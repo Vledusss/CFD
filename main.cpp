@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "Godunov.hpp"
-#include "Burgers.hpp"
+#include "Burgers/Burgers.hpp"
 
 template<indexType N>
 std::array<double, N> func1(const double dx) {
