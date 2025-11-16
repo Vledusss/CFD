@@ -1,4 +1,5 @@
 /build
 /.vscode
+/.venv
 plot2D.py
 plotCM.py
