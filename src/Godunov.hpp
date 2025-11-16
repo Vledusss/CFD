@@ -2,15 +2,16 @@
 
 #include <array>
 #include <cassert>
-#include "Core"
+
+#include "Core" // eigen
 
 using indexType = std::size_t;
 
 template<typename Equation, indexType N>
 struct Godunov {
     static void solve(Equation& eq, const double dx, const double dt, const double t) {
-        assert(dx != 0.0);
-        assert(dt != 0.0);
+        assert(dx > 0);
+        assert(dt > 0);
 
         const double ratio = dt / dx;
 
