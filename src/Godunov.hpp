@@ -44,31 +44,20 @@ struct Godunov<Euler::EulerEquation<N>, N> {
 
         const double ratio = dt / dx;
 
-        std::array<Euler::EulerState, N + 1> tempState;
         std::array<Euler::EulerFlux, N + 1> F;
 
         // Граничные условия (простейшие - фиксированные)
-        tempState.front() = eq.state.front();
-        tempState.back() = eq.state.back();
-
-        // Реконструкция на гранях ячеек
-        for (indexType j = 0; j < N - 1; ++j) {
-            tempState[j + 1] = eq.calcU(eq.state[j], eq.state[j + 1]);
-        }
+        F.front() = eq.calcF(0, eq.state.front());
+        F.back() = eq.calcF(0, eq.state.back());
 
         // Вычисление потоков на гранях
-        for (indexType j = 0; j < N + 1; ++j) {
-            F[j] = eq.calcF(j, tempState[j]);
+        for (indexType j = 1; j < N; ++j) {
+            F[j] = eq.hllFlux(eq.state[j - 1], eq.state[j]);
         }
 
         // Обновление консервативных переменных
         for (indexType j = 1; j <= N; ++j) {
-            Euler::EulerFlux flux_diff = F[j] - F[j - 1];
-            eq.state[j - 1] -= Euler::EulerState(
-                ratio * flux_diff.f_rho,
-                ratio * flux_diff.f_momentum, 
-                ratio * flux_diff.f_energy
-            );
+            eq.state[j - 1] -= (F[j] - F[j - 1]) * ratio;
         }
     }
 };

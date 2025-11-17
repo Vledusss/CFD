@@ -1,5 +1,7 @@
 #pragma once 
 
+#include "EulerState.hpp"
+
 namespace Euler {
 // Поток для Эйлера
 struct EulerFlux {
@@ -25,8 +27,8 @@ struct EulerFlux {
         );
     }
     
-    EulerFlux operator*(double scalar) const {
-        return EulerFlux(f_rho * scalar, f_momentum * scalar, f_energy * scalar);
+    EulerState operator*(double scalar) const { // для умножения на CFL
+        return EulerState(f_rho * scalar, f_momentum * scalar, f_energy * scalar);
     }
 };
 
