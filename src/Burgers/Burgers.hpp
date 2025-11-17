@@ -38,7 +38,7 @@ struct Burgers
         return U * U / 2.; 
     }
 
-    double calcU(const double UL, const double UR, const double x, const double t) {
+    double calcU(const double UL, const double UR) {
         return UL + UR > 0 ? UL : UR;
     }
 };
