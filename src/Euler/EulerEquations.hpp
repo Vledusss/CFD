@@ -40,7 +40,9 @@ public:
         );
     }
     
-EulerFlux hllFlux(const EulerState& left, const EulerState& right, const double ratio) const {
+EulerFlux hllFlux(const EulerState& left, const EulerState& right, 
+                  const double dx, double& timeStep, 
+                  const double CFL = 0.8) const {
     const double pL = getPressure(left);
     const double pR = getPressure(right);
     
@@ -53,7 +55,9 @@ EulerFlux hllFlux(const EulerState& left, const EulerState& right, const double 
     const double SL = std::min(uL - aL, uR - aR);
     const double SR = std::max(uL + aL, uR + aR);
 
-    assert(ratio * std::max(SR, -SL) <= 1);
+    if (std::max(SR, -SL) * timeStep / dx > 1) {
+        timeStep = CFL * dx / std::max(SR, -SL);
+    }
     
     const EulerFlux FL = calcF(0, left);
     const EulerFlux FR = calcF(0, right);

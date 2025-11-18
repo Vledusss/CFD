@@ -45,37 +45,39 @@
 // }
 
 void testEuler() {
-    const indexType N = 1000;         // по пространству
-    Euler::EulerEquation<N> eq;       // gamma = 1.4
+    const indexType N = 100;         // по пространству
+    std::vector<std::tuple<double, Euler::EulerEquation<N>>> eq;       // gamma = 1.4
+    Euler::EulerEquation<N> initial;
     
     // Инициализация условий Римана
     for (indexType i = 0; i < N/2; ++i) {
         // Левая часть: высокое давление
-        eq.state[i] = Euler::EulerState(1.0, 1.0, 1.0);  // ρ=1, u=0, p=1.0
+        initial.state[i] = Euler::EulerState(1.0, 1.0, 1.0);  // ρ=1, u=0, p=1.0
     }
     for (indexType i = N/2; i < N; ++i) {
         // Правая часть: низкое давление  
-        eq.state[i] = Euler::EulerState(0.8, -1.0, 0.2); // ρ=0.125, u=0, p=0.1
+        initial.state[i] = Euler::EulerState(0.8, 0.0, 0.5); // ρ=0.125, u=0, p=0.1
     }
     
-    const double dx = 1;
+    const double dx = 0.1;
     const double dt = 0.1 * dx;  // CFL условие
-    const double t_end = 100;
+    const double startTime = 0;
+    const double endTime = 3;
 
-    double t = 0;
+    eq.emplace_back(std::make_tuple(startTime, initial));
     
     std::ofstream file("res.csv");
     file << "t,x,rho,u,p" << std::endl;
 
-    while (t < t_end) {
+    Godunov<Euler::EulerEquation<N>, N>::solve(eq, startTime, endTime, dx, dt);
+    for (const auto& elem : eq) {
         for (indexType i = 0; i < N; ++i) {
-            const double p = eq.getPressure(eq.state[i]);
-            const double u = eq.getVelocity(eq.state[i]);
-            const double rho = eq.state[i].rho;
-            file << t << ',' << i * dx << ',' << rho << ',' << u << ',' << p << std::endl;
+            const auto U = std::get<1>(elem);
+            const double rho = U.state[i].rho;
+            const double u = U.getVelocity(U.state[i]);
+            const double p = U.getPressure(U.state[i]);
+            file << std::get<0>(elem) << ',' << i * dx << ',' << rho << ',' << u << ',' << p << std::endl;
         }
-        Godunov<Euler::EulerEquation<N>, N>::solve(eq, dx, dt);
-        t += dt;
     }
     
     file.close();

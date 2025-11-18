@@ -1,6 +1,8 @@
 #pragma once
 
+#include <tuple>
 #include <array>
+#include <vector>
 #include <cassert>
 
 #include "Core" // eigen
@@ -38,25 +40,41 @@ struct Godunov {
 
 template<indexType N>
 struct Godunov<Euler::EulerEquation<N>, N> {
-    static void solve(Euler::EulerEquation<N>& eq, const double dx, const double dt) {
+    static void solve(std::vector<std::tuple<double, Euler::EulerEquation<N>>>& eq, 
+                      const double startTime, const double endTime,
+                      const double dx, const double dt) {
+        assert(startTime < endTime);
         assert(dx > 0);
         assert(dt > 0);
 
-        const double ratio = dt / dx;
+        double t = startTime;  
+        std::array<Euler::EulerFlux, N + 1> F;                 
+        
+        while (t <= endTime)
+        {
+            Euler::EulerEquation<N> solution = std::get<1>(eq.back());
+            F.fill(Euler::EulerFlux(0, 0, 0));
 
-        std::array<Euler::EulerFlux, N + 1> F;
+            F.front() = solution.calcF(0, solution.state.front()); // ГУ
+            F.back() = solution.calcF(0, solution.state.back());   // ГУ
 
-        F.front() = eq.calcF(0, eq.state.front()); // ГУ
-        F.back() = eq.calcF(0, eq.state.back());   // ГУ
+            double timeStep = dt;
 
-        // Вычисление потоков на гранях
-        for (indexType j = 1; j < N; ++j) {
-            F[j] = eq.hllFlux(eq.state[j - 1], eq.state[j], ratio);
-        }
+            // Вычисление потоков на гранях
+            for (indexType j = 1; j < N; ++j) {
+                F[j] = solution.hllFlux(solution.state[j - 1], solution.state[j], dx, timeStep);
+            }
 
-        // Обновление консервативных переменных
-        for (indexType j = 0; j < N; ++j) {
-            eq.state[j] -= (F[j + 1] - F[j]) * ratio;
+            const double ratio = timeStep / dx;
+
+            // Обновление консервативных переменных
+            for (indexType j = 0; j < N; ++j) {
+                solution.state[j] -= (F[j + 1] - F[j]) * ratio;
+            }
+
+            eq.emplace_back(std::make_tuple(t, solution));
+
+            t += timeStep;
         }
     }
 };
