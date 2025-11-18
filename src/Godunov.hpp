@@ -46,9 +46,8 @@ struct Godunov<Euler::EulerEquation<N>, N> {
 
         std::array<Euler::EulerFlux, N + 1> F;
 
-        // Граничные условия (простейшие - фиксированные)
-        F.front() = eq.calcF(0, eq.state.front());
-        F.back() = eq.calcF(0, eq.state.back());
+        F.front() = eq.calcF(0, eq.state.front()); // ГУ
+        F.back() = eq.calcF(0, eq.state.back());   // ГУ
 
         // Вычисление потоков на гранях
         for (indexType j = 1; j < N; ++j) {
