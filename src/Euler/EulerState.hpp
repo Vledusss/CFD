@@ -1,5 +1,7 @@
 #pragma once 
 
+#include "EulerFlux.hpp"
+
 namespace Euler {
 // Вектор состояния для Эйлера (ρ, ρu, ρE)
 struct EulerState {
@@ -7,14 +9,20 @@ struct EulerState {
     double rho_u;   // импульс  
     double rho_E;   // полная энергия
     
-    EulerState(double r = 0, double ru = 0, double rE = 0) 
-        : rho(r), rho_u(ru), rho_E(rE) {}
+    EulerState(const double density = 0, 
+               const double velocity = 0, 
+               const double pressure = 0, 
+               const double gamma = 1.4) : rho(density) {
+        rho_u = density * velocity;
+        const double E = pressure / ((gamma - 1) * rho) + 0.5 * velocity * velocity;
+        rho_E = rho * E;
+    }
     
     // Арифметические операции для схемы
-    EulerState& operator-=(const EulerState& other) {
-        rho -= other.rho;
-        rho_u -= other.rho_u;
-        rho_E -= other.rho_E;
+    EulerState& operator-=(const EulerFlux& flux) {
+        rho -= flux.f_rho;
+        rho_u -= flux.f_momentum;
+        rho_E -= flux.f_energy;
         return *this;
     }
     

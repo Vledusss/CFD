@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <cassert>
 
 #include "EulerState.hpp"
 #include "EulerFlux.hpp"
@@ -32,10 +33,7 @@ public:
         const double vel = getVelocity(U);
         const double p = (gamma - 1.0) * (U.rho_E - 0.5 * U.rho * vel * vel);
         return std::max(p, 1e-10);  // избегаем отрицательного давления
-    }
-    
-    double getEnergy(const EulerState& U) const {
-        return U.rho_E / U.rho;  // ρE / ρ = E
+        // return p <= 0 || std::isnan(p) ? 1e-10 : p;
     }
     
     // Вычисление потока F(u) для уравнений Эйлера
@@ -49,7 +47,7 @@ public:
         );
     }
     
-EulerFlux hllFlux(const EulerState& left, const EulerState& right) const {
+EulerFlux hllFlux(const EulerState& left, const EulerState& right, const double ratio) const {
     // Вычисляем скорости звука и характеристики
     const double pL = getPressure(left);
     const double pR = getPressure(right);
@@ -63,6 +61,8 @@ EulerFlux hllFlux(const EulerState& left, const EulerState& right) const {
     // Оценки волновых скоростей (простой вариант)
     const double SL = std::min(uL - aL, uR - aR);
     const double SR = std::max(uL + aL, uR + aR);
+
+    // assert(ratio * std::max(SR, -SL) <= 1);
     
     const EulerFlux FL = calcF(0, left);
     const EulerFlux FR = calcF(0, right);
@@ -75,6 +75,7 @@ EulerFlux hllFlux(const EulerState& left, const EulerState& right) const {
     } else {
         // HLL центральная область
         const double factor = 1.0 / (SR - SL);
+        assert(SR != SL);
         return EulerFlux(
             (SR * FL.f_rho - SL * FR.f_rho + SL * SR * (right.rho - left.rho)) * factor,
             (SR * FL.f_momentum - SL * FR.f_momentum + SL * SR * (right.rho_u - left.rho_u)) * factor,

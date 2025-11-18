@@ -52,12 +52,12 @@ struct Godunov<Euler::EulerEquation<N>, N> {
 
         // Вычисление потоков на гранях
         for (indexType j = 1; j < N; ++j) {
-            F[j] = eq.hllFlux(eq.state[j - 1], eq.state[j]);
+            F[j] = eq.hllFlux(eq.state[j - 1], eq.state[j], ratio);
         }
 
         // Обновление консервативных переменных
-        for (indexType j = 1; j <= N; ++j) {
-            eq.state[j - 1] -= (F[j] - F[j - 1]) * ratio;
+        for (indexType j = 0; j < N; ++j) {
+            eq.state[j] -= (F[j + 1] - F[j]) * ratio;
         }
     }
 };
