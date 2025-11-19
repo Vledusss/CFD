@@ -2,11 +2,10 @@
 
 #include <tuple>
 #include <array>
-#include <vector>
-#include <cassert>
 
-#include "Core" // eigen
+// #include "Core" // eigen
 #include "Euler/EulerEquations.hpp"
+#include "solvers/HLL.hpp"
 
 using indexType = std::size_t;
 
@@ -39,8 +38,8 @@ struct Godunov {
 };
 
 template<indexType N>
-struct Godunov<Euler::EulerEquation<N>, N> {
-    static void solve(std::vector<std::tuple<double, Euler::EulerEquation<N>>>& eq, 
+struct Godunov<Euler::Equation<N>, N> {
+    static void solve(std::vector<std::tuple<double, Euler::Equation<N>>>& eq, 
                       const double startTime, const double endTime,
                       const double dx, const double dt) {
         assert(startTime < endTime);
@@ -52,22 +51,22 @@ struct Godunov<Euler::EulerEquation<N>, N> {
         
         while (t <= endTime)
         {
-            Euler::EulerEquation<N> solution = std::get<1>(eq.back());
+            Euler::Equation<N> solution = std::get<1>(eq.back());
             F.fill(Euler::Flux(0, 0, 0));
 
-            F.front() = solution.calcF(0, solution.states.front()); // перенос из центра
-            F.back() = solution.calcF(0, solution.states.back());   // перенос из центра
+            F.front() = solution.calcFlux(solution.states.front()); // перенос из центра
+            F.back() = solution.calcFlux(solution.states.back());   // перенос из центра
 
             double timeStep = dt;
 
-            // Вычисление потоков на гранях
+            using HLLSolver = Solvers::HLL<Euler::State, Euler::Flux, Euler::Equation<N>>;
+
             for (indexType j = 1; j < N; ++j) {
-                F[j] = solution.hllFlux(solution.states[j - 1], solution.states[j], dx, timeStep);
+                F[j] = HLLSolver::solve(solution, solution.states[j - 1], solution.states[j], dx, timeStep);
             }
 
             const double ratio = timeStep / dx;
 
-            // Обновление консервативных переменных
             for (indexType j = 0; j < N; ++j) {
                 solution.states[j] -= (F[j + 1] - F[j]) * ratio;
             }
@@ -76,7 +75,7 @@ struct Godunov<Euler::EulerEquation<N>, N> {
             solution.states[N - 1] = solution.states[N - 2];  // ГУ
 
             solution.smooth();
-            
+
             eq.emplace_back(std::make_tuple(t, solution));
 
             t += timeStep;

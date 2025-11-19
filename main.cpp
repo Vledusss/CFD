@@ -45,9 +45,9 @@
 // }
 
 void testEuler() {
-    const indexType N = 1000;         // по пространству
-    std::vector<std::tuple<double, Euler::EulerEquation<N>>> eq;       // gamma = 1.4
-    Euler::EulerEquation<N> initial;
+    const indexType N = 1000;                                   // по пространству
+    std::vector<std::tuple<double, Euler::Equation<N>>> eq;     // gamma = 1.4
+    Euler::Equation<N> initial;
     
     // НУ
     for (indexType i = 0; i < N / 2; ++i) {
@@ -60,14 +60,14 @@ void testEuler() {
     const double dx = 0.1;
     const double dt = 0.1 * dx;  // CFL условие
     const double startTime = 0;
-    const double endTime = 20;
+    const double endTime = 15;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
     
     std::ofstream file("res.csv");
     file << "t,x,rho,u,p" << std::endl;
 
-    Godunov<Euler::EulerEquation<N>, N>::solve(eq, startTime, endTime, dx, dt);
+    Godunov<Euler::Equation<N>, N>::solve(eq, startTime, endTime, dx, dt);
     for (const auto& elem : eq) {
         for (indexType i = 0; i < N; ++i) {
             const auto U = std::get<1>(elem);

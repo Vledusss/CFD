@@ -1,5 +1,7 @@
 #pragma once 
 
+#include <cassert>
+
 namespace Euler {
 struct Flux {
     double density;           // ρu
@@ -34,6 +36,11 @@ struct Flux {
     
     Flux operator*(const double scalar) const {
         return {density * scalar, momentum * scalar, energy * scalar};
+    }
+
+    Flux operator/(const double scalar) const {
+        assert(scalar != 0.0);
+        return {density / scalar, momentum / scalar, energy / scalar};
     }
 };
 

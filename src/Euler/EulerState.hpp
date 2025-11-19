@@ -21,6 +21,14 @@ struct State {
         return *this;
     }
 
+    State operator+(const State& other) const {
+        return State(
+            rho + other.rho,
+            rho_u + other.rho_u,
+            rho_E + other.rho_E
+        );
+    }
+
     State operator-(const State& other) const {
         return State(
             rho - other.rho,
