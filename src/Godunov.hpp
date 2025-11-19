@@ -55,8 +55,8 @@ struct Godunov<Euler::EulerEquation<N>, N> {
             Euler::EulerEquation<N> solution = std::get<1>(eq.back());
             F.fill(Euler::EulerFlux(0, 0, 0));
 
-            F.front() = solution.calcF(0, solution.state.front()); // ГУ
-            F.back() = solution.calcF(0, solution.state.back());   // ГУ
+            F.front() = solution.calcF(0, solution.state.front()); // перенос из центра
+            F.back() = solution.calcF(0, solution.state.back());   // перенос из центра
 
             double timeStep = dt;
 
@@ -72,6 +72,10 @@ struct Godunov<Euler::EulerEquation<N>, N> {
                 solution.state[j] -= (F[j + 1] - F[j]) * ratio;
             }
 
+            solution.state[0] = solution.state[1];          // ГУ
+            solution.state[N - 1] = solution.state[N - 2];  // ГУ
+
+            solution.smooth();
             eq.emplace_back(std::make_tuple(t, solution));
 
             t += timeStep;

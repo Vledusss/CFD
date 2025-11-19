@@ -45,24 +45,22 @@
 // }
 
 void testEuler() {
-    const indexType N = 100;         // по пространству
+    const indexType N = 1000;         // по пространству
     std::vector<std::tuple<double, Euler::EulerEquation<N>>> eq;       // gamma = 1.4
     Euler::EulerEquation<N> initial;
     
-    // Инициализация условий Римана
-    for (indexType i = 0; i < N/2; ++i) {
-        // Левая часть: высокое давление
-        initial.state[i] = Euler::EulerState(1.0, 1.0, 1.0);  // ρ=1, u=0, p=1.0
+    // НУ
+    for (indexType i = 0; i < N / 2; ++i) {
+        initial.state[i] = Euler::EulerState(1.0, 2.0, 1.0);  // ρ=1, u=0, p=1.0
     }
-    for (indexType i = N/2; i < N; ++i) {
-        // Правая часть: низкое давление  
+    for (indexType i = N / 2; i < N; ++i) {
         initial.state[i] = Euler::EulerState(0.8, 0.0, 0.5); // ρ=0.125, u=0, p=0.1
     }
     
     const double dx = 0.1;
-    const double dt = 0.1 * dx;  // CFL условие
+    const double dt = 0.01 * dx;  // CFL условие
     const double startTime = 0;
-    const double endTime = 3;
+    const double endTime = 15;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
     
