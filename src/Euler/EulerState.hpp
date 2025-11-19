@@ -11,8 +11,7 @@ struct State {
     State(const double density = 0, const double velocity = 0, 
           const double pressure = 0, const double gamma = 1.4) : rho(density) {
         rho_u = density * velocity;
-        const double E = pressure / ((gamma - 1) * rho) + 0.5 * velocity * velocity;
-        rho_E = rho * E;
+        rho_E = pressure / (gamma - 1) + 0.5 * rho * velocity * velocity;
     }
 
     State& operator-=(const Flux& flux) {
@@ -21,9 +20,17 @@ struct State {
         rho_E -= flux.energy;
         return *this;
     }
+
+    State operator-(const State& other) const {
+        return State(
+            rho - other.rho,
+            rho_u - other.rho_u,
+            rho_E - other.rho_E
+        );
+    }
     
-    State operator*(const double scalar) const {
-        return State(rho * scalar, rho_u * scalar, rho_E * scalar);
+    Flux operator*(const double scalar) const {
+        return Flux(rho * scalar, rho_u * scalar, rho_E * scalar);
     }
 };
 

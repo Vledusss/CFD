@@ -17,7 +17,7 @@ public:
     double gamma;
     
     EulerEquation(double g = 1.4) : gamma(g) {
-        for (auto& s : states) { s = State(0, 0, 0); }
+        for (auto& state : states) { state = State(0, 0, 0); }
     }
     
     double getVelocity(const State& U) const {
@@ -26,7 +26,7 @@ public:
 
     double getPressure(const State& state) const {
         const double vel = getVelocity(state);
-        const double p = (gamma - 1.0) * (state.rho_E - 0.5 * state.rho * vel * vel);
+        const double p = (gamma - 1) * (state.rho_E - 0.5 * state.rho * vel * vel);
         return std::isnan(p) || p <= 0 ? 1e-10 : p;
     }
     
@@ -34,9 +34,9 @@ public:
         const double p = getPressure(state);
         
         return Flux(
-            state.rho_u,                             // ρu
-            state.rho_u * state.rho_u + p,               // ρu² + p  
-            state.rho_u * (state.rho_E + p)              // u(ρE + p)
+            state.rho_u,                            // ρu
+            state.rho_u * state.rho_u + p,          // ρu² + p  
+            state.rho_u * (state.rho_E + p)         // u(ρE + p)
         );
     }
     
@@ -68,11 +68,7 @@ public:
             return FR;
         } else {
             const double factor = 1.0 / (SR - SL);
-            return Flux(
-                (SR * FL.density - SL * FR.density + SL * SR * (right.rho - left.rho)) * factor,
-                (SR * FL.momentum - SL * FR.momentum + SL * SR * (right.rho_u - left.rho_u)) * factor,
-                (SR * FL.energy - SL * FR.energy + SL * SR * (right.rho_E - left.rho_E)) * factor
-            );
+            return (FL * SR - FR * SL + (right - left) * SL * SR) * factor;
         }
     }
 

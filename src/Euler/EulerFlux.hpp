@@ -16,6 +16,14 @@ struct Flux {
         return *this;
     }
 
+    Flux operator+(const Flux& other) const {
+        return Flux(
+            density + other.density,
+            momentum + other.momentum,
+            energy + other.energy
+        );
+    }
+
     Flux operator-(const Flux& other) const {
         return Flux(
             density - other.density,

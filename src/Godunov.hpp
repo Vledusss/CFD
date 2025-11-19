@@ -76,6 +76,7 @@ struct Godunov<Euler::EulerEquation<N>, N> {
             solution.states[N - 1] = solution.states[N - 2];  // ГУ
 
             solution.smooth();
+            
             eq.emplace_back(std::make_tuple(t, solution));
 
             t += timeStep;
