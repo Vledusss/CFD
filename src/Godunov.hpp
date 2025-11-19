@@ -48,32 +48,32 @@ struct Godunov<Euler::EulerEquation<N>, N> {
         assert(dt > 0);
 
         double t = startTime;  
-        std::array<Euler::EulerFlux, N + 1> F;                 
+        std::array<Euler::Flux, N + 1> F;                 
         
         while (t <= endTime)
         {
             Euler::EulerEquation<N> solution = std::get<1>(eq.back());
-            F.fill(Euler::EulerFlux(0, 0, 0));
+            F.fill(Euler::Flux(0, 0, 0));
 
-            F.front() = solution.calcF(0, solution.state.front()); // перенос из центра
-            F.back() = solution.calcF(0, solution.state.back());   // перенос из центра
+            F.front() = solution.calcF(0, solution.states.front()); // перенос из центра
+            F.back() = solution.calcF(0, solution.states.back());   // перенос из центра
 
             double timeStep = dt;
 
             // Вычисление потоков на гранях
             for (indexType j = 1; j < N; ++j) {
-                F[j] = solution.hllFlux(solution.state[j - 1], solution.state[j], dx, timeStep);
+                F[j] = solution.hllFlux(solution.states[j - 1], solution.states[j], dx, timeStep);
             }
 
             const double ratio = timeStep / dx;
 
             // Обновление консервативных переменных
             for (indexType j = 0; j < N; ++j) {
-                solution.state[j] -= (F[j + 1] - F[j]) * ratio;
+                solution.states[j] -= (F[j + 1] - F[j]) * ratio;
             }
 
-            solution.state[0] = solution.state[1];          // ГУ
-            solution.state[N - 1] = solution.state[N - 2];  // ГУ
+            solution.states[0] = solution.states[1];          // ГУ
+            solution.states[N - 1] = solution.states[N - 2];  // ГУ
 
             solution.smooth();
             eq.emplace_back(std::make_tuple(t, solution));

@@ -51,16 +51,16 @@ void testEuler() {
     
     // НУ
     for (indexType i = 0; i < N / 2; ++i) {
-        initial.state[i] = Euler::EulerState(1.0, 2.0, 1.0);  // ρ=1, u=0, p=1.0
+        initial.states[i] = Euler::State(1.0, 2.0, 1.0);  // ρ=1, u=0, p=1.0
     }
     for (indexType i = N / 2; i < N; ++i) {
-        initial.state[i] = Euler::EulerState(0.8, 0.0, 0.5); // ρ=0.125, u=0, p=0.1
+        initial.states[i] = Euler::State(0.8, 0.0, 0.5); // ρ=0.125, u=0, p=0.1
     }
     
     const double dx = 0.1;
-    const double dt = 0.01 * dx;  // CFL условие
+    const double dt = 0.1 * dx;  // CFL условие
     const double startTime = 0;
-    const double endTime = 15;
+    const double endTime = 20;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
     
@@ -71,9 +71,9 @@ void testEuler() {
     for (const auto& elem : eq) {
         for (indexType i = 0; i < N; ++i) {
             const auto U = std::get<1>(elem);
-            const double rho = U.state[i].rho;
-            const double u = U.getVelocity(U.state[i]);
-            const double p = U.getPressure(U.state[i]);
+            const double rho = U.states[i].rho;
+            const double u = U.getVelocity(U.states[i]);
+            const double p = U.getPressure(U.states[i]);
             file << std::get<0>(elem) << ',' << i * dx << ',' << rho << ',' << u << ',' << p << std::endl;
         }
     }
