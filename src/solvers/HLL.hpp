@@ -6,8 +6,7 @@
 namespace Solvers {
 
 template<typename State, typename Flux, typename Equation>
-struct HLL
-{
+struct HLL {
     static Flux solve(const Equation& eq, const State& left, const State& right, 
                       const double dx, double& timeStep, const double CFL = 0.8) {
         const double pL = eq.getPressure(left);
@@ -16,11 +15,11 @@ struct HLL
         const double uL = eq.getVelocity(left);
         const double uR = eq.getVelocity(right);
         
-        const double aL = std::sqrt(std::abs(eq.getGamma() * pL / left.rho));
-        const double aR = std::sqrt(std::abs(eq.getGamma() * pR / right.rho));
+        const double cL = std::sqrt(eq.getGamma() * pL / left.rho);
+        const double cR = std::sqrt(eq.getGamma() * pR / right.rho);
         
-        const double SL = std::min(uL - aL, uR - aR);
-        const double SR = std::max(uL + aL, uR + aR);
+        const double SL = std::min(uL - cL, uR - cR);
+        const double SR = std::max(uL + cL, uR + cR);
 
         const double maxVelocity = std::max(std::abs(SR), std::abs(SL));
 

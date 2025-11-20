@@ -21,7 +21,7 @@ public:
     }
     
     static double getVelocity(const State& state) {
-        // assert(state.rho > 0);
+        assert(state.rho > 0);
         return state.rho_u / state.rho;
     }
 

@@ -6,6 +6,7 @@
 // #include "Core" // eigen
 #include "Euler/EulerEquations.hpp"
 #include "solvers/HLL.hpp"
+#include "solvers/HLLC.hpp"
 
 using indexType = std::size_t;
 
@@ -63,6 +64,7 @@ struct Godunov<Euler::Equation<N>, N> {
             double timeStep = dt;
 
             using HLLSolver = Solvers::HLL<Euler::State, Euler::Flux, Euler::Equation<N>>;
+            using HLLCSolver = Solvers::HLLC<Euler::State, Euler::Flux, Euler::Equation<N>>;
 
             for (indexType i = 1; i < N; ++i) {
                 F[i] = HLLSolver::solve(solution, solution.states[i - 1], solution.states[i], dx, timeStep);
