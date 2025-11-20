@@ -13,8 +13,8 @@ void testEuler() {
     Euler::Equation<N> initial;
     
     // НУ (ρ, u, p)
-    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::State(1.0, 0.5, 1.0); }
-    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::State(0.2, 0.0, 0.5); }
+    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::State(1.0, 0.0, 2.0); }
+    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::State(0.8, 0.0, 0.5); }
     
     const double dx = 0.1;
     
@@ -27,7 +27,8 @@ void testEuler() {
 
     if (file.is_open()) {
         file << "t,x,rho,u,p" << std::endl;
-        Godunov<Euler::Equation<N>, N>::solve(eq, startTime, endTime, dx);
+        Godunov<Euler::Equation<N>, N>::solve(eq, startTime, endTime, dx, 0.4);
+        // std::cout << "DONE" << std::endl;
 
         for (const auto& elem : eq) {
             for (indexType i = 0; i < N; ++i) {

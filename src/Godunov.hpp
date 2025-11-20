@@ -71,20 +71,18 @@ struct Godunov<Euler::Equation<N>, N> {
             using HLLCSolver = Solvers::HLLC<Euler::State, Euler::Flux, Euler::Equation<N>>;
 
             for (indexType i = 1; i < N; ++i) {
-                // const double rhoL = solution.states[i - 1].rho;
-                // const double rhoR = solution.states[i].rho;
+                const double rhoL = solution.states[i - 1].rho;
+                const double rhoR = solution.states[i].rho;
 
-                // const double pL = solution.getPressure(solution.states[i - 1]);
-                // const double pR = solution.getPressure(solution.states[i]);
+                const double pL = solution.getPressure(solution.states[i - 1]);
+                const double pR = solution.getPressure(solution.states[i]);
 
-                // const bool densityCheck = std::max(rhoL / rhoR, rhoR / rhoL) > 5;
-                // const bool pressureCheck = std::max(pL / pR, rhoR / pL) > 3;
+                const bool densityCheck = std::max(rhoL / rhoR, rhoR / rhoL) > 5;
+                const bool pressureCheck = std::max(pL / pR, rhoR / pL) > 3;
 
-                // F[i] = densityCheck || pressureCheck ?
-                //        HLLSolver::solve(solution, i) :
-                //        HLLCSolver::solve(solution, i);
-
-                F[i] = HLLSolver::solve(solution, i);
+                F[i] = densityCheck || pressureCheck ?
+                       HLLSolver::solve(solution, i) :
+                       HLLCSolver::solve(solution, i);
             }
 
             for (indexType i = 0; i < N; ++i) {
