@@ -67,7 +67,7 @@ struct Godunov<Euler::Equation<N>, N> {
             using HLLCSolver = Solvers::HLLC<Euler::State, Euler::Flux, Euler::Equation<N>>;
 
             for (indexType i = 1; i < N; ++i) {
-                F[i] = HLLSolver::solve(solution, solution.states[i - 1], solution.states[i], dx, timeStep);
+                F[i] = HLLSolver::solve(solution, i, dx, timeStep);
             }
 
             for (indexType i = 0; i < N; ++i) {
