@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "HLL.hpp"
+
 namespace Solvers {
 
 template<typename State, typename Flux, typename Equation>
@@ -29,11 +31,16 @@ struct HLLC {
         const double SR = std::max(uL + cL, uR + cR);
 
         const double denom = rhoL * (SL - uL) - rhoR * (SR - uR);
+
+        if (denom < 1e-10) { return HLL<State, Flux, Equation>::solve(eq, i, dx, timeStep, CFL); }
+
         const double SM = (pR - pL + rhoL * uL * (SL - uL) - rhoR * uR * (SR - uR)) / denom;
 
         const double pStarL = pL + rhoL * (SL - uL) * (SM - uL); 
         const double pStarR = pR + rhoR * (SR - uR) * (SM - uR); 
         const double pStar = (pStarL + pStarR) / 2.;
+
+        if (pStar < 1e-10) { return HLL<State, Flux, Equation>::solve(eq, i, dx, timeStep, CFL); }
 
         const double maxVelocity = std::max({std::abs(SR), std::abs(SL), std::abs(SM)});
 
