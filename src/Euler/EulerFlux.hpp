@@ -7,7 +7,7 @@ namespace Euler {
 struct Flux {
     double density;           // ρu
     double momentum;          // ρu² + p
-    double energy;            // u(ρE + p)
+    double energy;            // u(E + p)
     
     Flux(double fr = 0, double fm = 0, double fe = 0)
         : density(fr), momentum(fm), energy(fe) {}

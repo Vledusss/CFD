@@ -27,7 +27,7 @@ public:
 
     double getPressure(const State& state) const {
         const double vel = getVelocity(state);
-        const double p = (gamma - 1) * (state.rho_E - 0.5 * state.rho * vel * vel);
+        const double p = (gamma - 1) * (state.E - 0.5 * state.rho * vel * vel);
         assert(p > 0);
         return p;
     }
@@ -40,7 +40,7 @@ public:
         return Flux(
             state.rho_u,                            // ρu
             state.rho_u * state.rho_u + p,          // ρu² + p  
-            state.rho_u * (state.rho_E + p)         // u(ρE + p)
+            state.rho_u * (state.E + p)         // u(ρE + p)
         );
     }
 
@@ -54,8 +54,8 @@ public:
         states[i].rho_u = (1.0 - alpha) * old_states[i].rho_u + 
                         0.5 * alpha * (old_states[i - 1].rho_u + old_states[i + 1].rho_u);
         
-        states[i].rho_E = (1.0 - alpha) * old_states[i].rho_E + 
-                        0.5 * alpha * (old_states[i - 1].rho_E + old_states[i + 1].rho_E);
+        states[i].E = (1.0 - alpha) * old_states[i].E + 
+                        0.5 * alpha * (old_states[i - 1].E + old_states[i + 1].E);
         }
     }
 };
