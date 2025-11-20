@@ -42,10 +42,9 @@ template<indexType N>
 struct Godunov<Euler::Equation<N>, N> {
     static void solve(std::vector<std::tuple<double, Euler::Equation<N>>>& eq, 
                       const double startTime, const double endTime,
-                      const double dx, const double dt) {
+                      const double dx, const double CFL = 0.2) {
         assert(startTime < endTime);
         assert(dx > 0);
-        assert(dt > 0);
 
         double t = startTime;  
         std::array<Euler::Flux, N + 1> F;                 
@@ -55,34 +54,38 @@ struct Godunov<Euler::Equation<N>, N> {
             Euler::Equation<N> solution = std::get<1>(eq.back());
             F.fill(Euler::Flux(0, 0, 0));
 
-            solution.states[0] = solution.states[1];          // ГУ
-            solution.states[N - 1] = solution.states[N - 2];  // ГУ
+            F.front() = solution.calcFlux(solution.states.front()); // перенос из центра
+            F.back() = solution.calcFlux(solution.states.back());   // перенос из центра
 
-            // F.front() = solution.calcFlux(solution.states.front()); // перенос из центра
-            // F.back() = solution.calcFlux(solution.states.back());   // перенос из центра
+            double maxVelocity = 0.0;
 
-            double timeStep = dt;
+            for (const auto& state : solution.states) {
+                const double c = std::sqrt(solution.getGamma() * solution.getPressure(state) / state.rho);
+                maxVelocity = std::max(maxVelocity, c + std::abs(solution.getVelocity(state)));
+            }
+
+            const double timeStep = CFL * dx / maxVelocity;
+            // std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
 
             using HLLSolver = Solvers::HLL<Euler::State, Euler::Flux, Euler::Equation<N>>;
             using HLLCSolver = Solvers::HLLC<Euler::State, Euler::Flux, Euler::Equation<N>>;
 
             for (indexType i = 1; i < N; ++i) {
-                const double rhoL = solution.states[i - 1].rho;
-                const double rhoR = solution.states[i].rho;
+                // const double rhoL = solution.states[i - 1].rho;
+                // const double rhoR = solution.states[i].rho;
 
-                const double pL = solution.getPressure(solution.states[i - 1]);
-                const double pR = solution.getPressure(solution.states[i]);
+                // const double pL = solution.getPressure(solution.states[i - 1]);
+                // const double pR = solution.getPressure(solution.states[i]);
 
-                const bool densityCheck = std::max(rhoL / rhoR, rhoR / rhoL) > 5;
-                const bool pressureCheck = std::max(pL / pR, rhoR / pL) > 3;
+                // const bool densityCheck = std::max(rhoL / rhoR, rhoR / rhoL) > 5;
+                // const bool pressureCheck = std::max(pL / pR, rhoR / pL) > 3;
 
-                F[i] = densityCheck || pressureCheck ?
-                       HLLSolver::solve(solution, i, dx, timeStep) :
-                       HLLCSolver::solve(solution, i, dx, timeStep);
+                // F[i] = densityCheck || pressureCheck ?
+                //        HLLSolver::solve(solution, i) :
+                //        HLLCSolver::solve(solution, i);
+
+                F[i] = HLLSolver::solve(solution, i);
             }
-
-            F[0] = F[1];
-            F[N] = F[N - 1];
 
             for (indexType i = 0; i < N; ++i) {
                 solution.states[i] -= (F[i + 1] - F[i]) * timeStep / dx;

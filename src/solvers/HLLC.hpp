@@ -10,8 +10,7 @@ namespace Solvers {
 
 template<typename State, typename Flux, typename Equation>
 struct HLLC {
-    static Flux solve(const Equation& eq, const indexType i, const double dx, 
-                      double& timeStep, const double CFL = 0.5) {
+    static Flux solve(const Equation& eq, const indexType i) {
         const State left = eq.states[i - 1];
         const State right = eq.states[i];
 
@@ -32,7 +31,7 @@ struct HLLC {
 
         const double denom = rhoL * (SL - uL) - rhoR * (SR - uR);
 
-        if (denom < 1e-10) { return HLL<State, Flux, Equation>::solve(eq, i, dx, timeStep, CFL); }
+        if (denom < 1e-10) { return HLL<State, Flux, Equation>::solve(eq, i); }
 
         const double SM = (pR - pL + rhoL * uL * (SL - uL) - rhoR * uR * (SR - uR)) / denom;
 
@@ -40,13 +39,7 @@ struct HLLC {
         const double pStarR = pR + rhoR * (SR - uR) * (SM - uR); 
         const double pStar = (pStarL + pStarR) / 2.;
 
-        if (pStar < 1e-10) { return HLL<State, Flux, Equation>::solve(eq, i, dx, timeStep, CFL); }
-
-        const double maxVelocity = std::max({std::abs(SR), std::abs(SL), std::abs(SM)});
-
-        if (maxVelocity * timeStep / dx > 1) {
-            timeStep = std::max(CFL * dx / maxVelocity, 1e-3);
-        }
+        if (pStar < 1e-10) { return HLL<State, Flux, Equation>::solve(eq, i); }
         
         const Flux FL = eq.calcFlux(left);
         const Flux FR = eq.calcFlux(right);

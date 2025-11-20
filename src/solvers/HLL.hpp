@@ -7,8 +7,7 @@ namespace Solvers {
 
 template<typename State, typename Flux, typename Equation>
 struct HLL {
-    static Flux solve(const Equation& eq, const indexType i, const double dx,
-                      double& timeStep, const double CFL = 0.5) {
+    static Flux solve(const Equation& eq, const indexType i) {
         const State left = eq.states[i - 1];
         const State right = eq.states[i];
 
@@ -23,12 +22,6 @@ struct HLL {
         
         const double SL = std::min(uL - cL, uR - cR);
         const double SR = std::max(uL + cL, uR + cR);
-
-        const double maxVelocity = std::max(std::abs(SR), std::abs(SL));
-
-        if (maxVelocity * timeStep / dx > 1) {
-            timeStep = std::max(CFL * dx / maxVelocity, 1e-3);
-        }
         
         const Flux FL = eq.calcFlux(left);
         const Flux FR = eq.calcFlux(right);

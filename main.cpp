@@ -13,11 +13,10 @@ void testEuler() {
     Euler::Equation<N> initial;
     
     // НУ (ρ, u, p)
-    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::State(1.0, 1.0, 1.0); }
-    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::State(0.5, 0.0, 0.5); }
+    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::State(1.0, 0.5, 1.0); }
+    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::State(0.2, 0.0, 0.5); }
     
     const double dx = 0.1;
-    const double dt = 0.1 * dx;  // CFL условие
     
     const double startTime = 0;
     const double endTime = 100;
@@ -28,7 +27,7 @@ void testEuler() {
 
     if (file.is_open()) {
         file << "t,x,rho,u,p" << std::endl;
-        Godunov<Euler::Equation<N>, N>::solve(eq, startTime, endTime, dx, dt);
+        Godunov<Euler::Equation<N>, N>::solve(eq, startTime, endTime, dx);
 
         for (const auto& elem : eq) {
             for (indexType i = 0; i < N; ++i) {

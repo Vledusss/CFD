@@ -28,7 +28,8 @@ public:
     double getPressure(const State& state) const {
         const double vel = getVelocity(state);
         const double p = (gamma - 1) * (state.rho_E - 0.5 * state.rho * vel * vel);
-        return std::isnan(p) || p <= 0 ? 1e-10 : p;
+        assert(p > 0);
+        return p;
     }
 
     double getGamma() const noexcept { return gamma; }
