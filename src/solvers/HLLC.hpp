@@ -2,15 +2,17 @@
 
 #include <cmath>
 #include <vector>
-#include <cassert>
 #include <algorithm>
 
 namespace Solvers {
 
 template<typename State, typename Flux, typename Equation>
 struct HLLC {
-    static Flux solve(const Equation& eq, const State& left, const State& right, 
-                      const double dx, double& timeStep, const double CFL = 0.8) {
+    static Flux solve(const Equation& eq, const indexType i, const double dx, 
+                      double& timeStep, const double CFL = 0.3) {
+        const State left = eq.states[i - 1];
+        const State right = eq.states[i];
+
         const double pL = eq.getPressure(left);
         const double pR = eq.getPressure(right);
         
@@ -31,8 +33,7 @@ struct HLLC {
 
         const double pStarL = pL + rhoL * (SL - uL) * (SM - uL); 
         const double pStarR = pR + rhoR * (SR - uR) * (SM - uR); 
-        assert(pStarL == pStarR);
-        const double pStar = pStarL;
+        const double pStar = (pStarL + pStarR) / 2.;
 
         const double maxVelocity = std::max({std::abs(SR), std::abs(SL), std::abs(SM)});
 
