@@ -9,7 +9,7 @@ namespace Solvers {
 template<typename State, typename Flux, typename Equation>
 struct HLLC {
     static Flux solve(const Equation& eq, const indexType i, const double dx, 
-                      double& timeStep, const double CFL = 0.3) {
+                      double& timeStep, const double CFL = 0.5) {
         const State left = eq.states[i - 1];
         const State right = eq.states[i];
 

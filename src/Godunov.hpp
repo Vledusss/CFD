@@ -58,8 +58,8 @@ struct Godunov<Euler::Equation<N>, N> {
             solution.states[0] = solution.states[1];          // ГУ
             solution.states[N - 1] = solution.states[N - 2];  // ГУ
 
-            F.front() = solution.calcFlux(solution.states.front()); // перенос из центра
-            F.back() = solution.calcFlux(solution.states.back());   // перенос из центра
+            // F.front() = solution.calcFlux(solution.states.front()); // перенос из центра
+            // F.back() = solution.calcFlux(solution.states.back());   // перенос из центра
 
             double timeStep = dt;
 
@@ -70,8 +70,12 @@ struct Godunov<Euler::Equation<N>, N> {
                 F[i] = HLLSolver::solve(solution, i, dx, timeStep);
             }
 
+            F[0] = F[1];
+            F[N] = F[N - 1];
+
             for (indexType i = 0; i < N; ++i) {
-                solution.states[i] -= (F[i + 1] - F[i]) * timeStep / dx;
+                const auto factor = timeStep / dx;
+                solution.states[i] -= (F[i + 1] - F[i]) * factor;
                 // if (solution.states[i].rho_E < 0) { std::cout << t << std::endl; }
             }
 
