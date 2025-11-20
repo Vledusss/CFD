@@ -51,7 +51,7 @@ struct HLLC {
             const double factor = rhoL * (SL - uL) / (SL - SM);
             UStarL.rho = factor;
             UStarL.rho_u = factor * SM;
-            UStarL.rho_E = factor * (left.rho_E / rhoL + (SM - uL) * (SM + pL / rhoL / (SL - uL)));
+            UStarL.E = factor * (left.E / rhoL + (SM - uL) * (SM + pL / rhoL / (SL - uL)));
 
             return FL + (UStarL - left) * SL; 
         }
@@ -60,7 +60,7 @@ struct HLLC {
             const double factor = rhoR * (SR - uR) / (SR - SM);
             UStarR.rho = factor;
             UStarR.rho_u = factor * SM;
-            UStarR.rho_E = factor * (right.rho_E / rhoR + (SM - uR) * (SM + pR / rhoR / (SR - uR)));
+            UStarR.E = factor * (right.E / rhoR + (SM - uR) * (SM + pR / rhoR / (SR - uR)));
 
             return FR + (UStarR - right) * SR; 
         }
