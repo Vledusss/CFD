@@ -49,18 +49,18 @@ void testEuler() {
     std::vector<std::tuple<double, Euler::Equation<N>>> eq;     // gamma = 1.4
     Euler::Equation<N> initial;
     
-    // НУ
-    for (indexType i = 0; i < N / 2; ++i) {
-        initial.states[i] = Euler::State(1.0, 2.0, 1.0);  // ρ=1, u=0, p=1.0
+    // НУ (ρ, u, p)
+    for (indexType i = 0; i < N / 4; ++i) {
+        initial.states[i] = Euler::State(1.0, 0.0, 1.0);
     }
-    for (indexType i = N / 2; i < N; ++i) {
-        initial.states[i] = Euler::State(0.8, 0.0, 0.5); // ρ=0.125, u=0, p=0.1
+    for (indexType i = N / 4; i < N; ++i) {
+        initial.states[i] = Euler::State(0.2, 0.0, 0.5);
     }
     
     const double dx = 0.1;
     const double dt = 0.1 * dx;  // CFL условие
     const double startTime = 0;
-    const double endTime = 15;
+    const double endTime = 100;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
     

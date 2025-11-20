@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "EulerState.hpp"
-#include "EulerFlux.hpp"
 
 using indexType = size_t;
 
@@ -21,8 +20,8 @@ public:
         for (auto& state : states) { state = State(0, 0, 0); }
     }
     
-    double getVelocity(const State& state) const {
-        assert(state.rho > 0);
+    static double getVelocity(const State& state) {
+        // assert(state.rho > 0);
         return state.rho_u / state.rho;
     }
 

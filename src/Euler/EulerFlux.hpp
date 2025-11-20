@@ -3,6 +3,7 @@
 #include <cassert>
 
 namespace Euler {
+
 struct Flux {
     double density;           // ρu
     double momentum;          // ρu² + p

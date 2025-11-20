@@ -3,6 +3,7 @@
 #include "EulerFlux.hpp"
 
 namespace Euler {
+
 struct State {
     double rho;             // ρ
     double rho_u;           // ρu  

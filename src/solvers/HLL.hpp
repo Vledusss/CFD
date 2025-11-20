@@ -22,8 +22,10 @@ struct HLL
         const double SL = std::min(uL - aL, uR - aR);
         const double SR = std::max(uL + aL, uR + aR);
 
-        if (std::max(SR, -SL) * timeStep / dx > 1) {
-            timeStep = std::max(CFL * dx / std::max(SR, -SL), 1e-3);
+        const double maxVelocity = std::max(std::abs(SR), std::abs(SL));
+
+        if (maxVelocity * timeStep / dx > 1) {
+            timeStep = std::max(CFL * dx / maxVelocity, 1e-3);
         }
         
         const Flux FL = eq.calcFlux(left);

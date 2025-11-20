@@ -49,10 +49,13 @@ struct Godunov<Euler::Equation<N>, N> {
         double t = startTime;  
         std::array<Euler::Flux, N + 1> F;                 
         
-        while (t <= endTime)
+        while (t < endTime)
         {
             Euler::Equation<N> solution = std::get<1>(eq.back());
             F.fill(Euler::Flux(0, 0, 0));
+
+            solution.states[0] = solution.states[1];          // ГУ
+            solution.states[N - 1] = solution.states[N - 2];  // ГУ
 
             F.front() = solution.calcFlux(solution.states.front()); // перенос из центра
             F.back() = solution.calcFlux(solution.states.back());   // перенос из центра
@@ -61,20 +64,16 @@ struct Godunov<Euler::Equation<N>, N> {
 
             using HLLSolver = Solvers::HLL<Euler::State, Euler::Flux, Euler::Equation<N>>;
 
-            for (indexType j = 1; j < N; ++j) {
-                F[j] = HLLSolver::solve(solution, solution.states[j - 1], solution.states[j], dx, timeStep);
+            for (indexType i = 1; i < N; ++i) {
+                F[i] = HLLSolver::solve(solution, solution.states[i - 1], solution.states[i], dx, timeStep);
             }
 
-            const double ratio = timeStep / dx;
-
-            for (indexType j = 0; j < N; ++j) {
-                solution.states[j] -= (F[j + 1] - F[j]) * ratio;
+            for (indexType i = 0; i < N; ++i) {
+                solution.states[i] -= (F[i + 1] - F[i]) * timeStep / dx;
+                // if (solution.states[i].rho_E < 0) { std::cout << t << std::endl; }
             }
 
-            solution.states[0] = solution.states[1];          // ГУ
-            solution.states[N - 1] = solution.states[N - 2];  // ГУ
-
-            solution.smooth();
+            // solution.smooth();
 
             eq.emplace_back(std::make_tuple(t, solution));
 
