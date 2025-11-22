@@ -20,10 +20,10 @@ struct HLLC {
         const double rhoL = left.rho;
         const double rhoR = right.rho;
 
-        const bool densityCheck = std::max(rhoL / rhoR, rhoR / rhoL) > 5;
-        const bool pressureCheck = std::max(pL / pR, pR / pL) > 3;
+        const bool highDensity = std::max(rhoL / rhoR, rhoR / rhoL) > 10;
+        const bool highPressure = std::max(pL / pR, pR / pL) > 10;
 
-        if (densityCheck || pressureCheck) { 
+        if (highDensity || highPressure) { 
             // std::cout << "HLL fallback!" << std::endl;
             return HLL<State, Flux, Equation>::solve(eq, i); 
         }
@@ -38,9 +38,6 @@ struct HLLC {
         const double SR = std::max(uL + cL, uR + cR);
 
         const double denom = rhoL * (SL - uL) - rhoR * (SR - uR);
-
-        if (denom < 1e-10) { return HLL<State, Flux, Equation>::solve(eq, i); }
-
         const double SM = (pR - pL + rhoL * uL * (SL - uL) - rhoR * uR * (SR - uR)) / denom;
 
         const double pStarL = pL + rhoL * (SL - uL) * (SM - uL); 
@@ -49,8 +46,6 @@ struct HLLC {
         
         const Flux FL = eq.calcFlux(left);
         const Flux FR = eq.calcFlux(right);
-
-        if (pStar < 1e-10) { return (FL + FR) / 2.; }
 
         if (SL >= 0) { return FL; } 
         else if (SR <= 0) { return FR; } 

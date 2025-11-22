@@ -67,7 +67,7 @@ template<indexType N>
 struct Core<Euler::Equation<N>, N> {
     static void solve(std::vector<std::tuple<double, Euler::Equation<N>>>& eq, 
                       const double startTime, const double endTime,
-                      const double dx, const double CFL = 0.2) {
+                      const double dx, const double CFL = 0.5) {
         assert(startTime < endTime);
         assert(dx > 0);
 

@@ -14,13 +14,13 @@ void testEuler() {
     Euler::Equation<N> initial;
     
     // НУ (ρ, u, p)
-    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::State(1.0, 0.0, 10.0); }
+    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::State(1.0, 10.0, 1.0); }
     for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::State(1.0, 0.0, 0.5); }
     
     const double dx = 1;
     
     const double startTime = 0;
-    const double endTime = 100;
+    const double endTime = 150;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
     
@@ -33,13 +33,12 @@ void testEuler() {
 
         for (const auto& elem : eq) {
             for (indexType i = 0; i < N; ++i) {
-                if (i * dx > 0.1 * N && i * dx < 0.9 * N) {
-                    const auto U = std::get<1>(elem);
-                    const double rho = U.states[i].rho;
-                    const double u = U.getVelocity(U.states[i]);
-                    const double p = U.getPressure(U.states[i]);
-                    file << std::setprecision(4) << std::get<0>(elem) << ',' << i * dx << ',' << rho << ',' << u << ',' << p << std::endl;
-                }
+                const auto U = std::get<1>(elem);
+                const double rho = U.states[i].rho;
+                const double u = U.getVelocity(U.states[i]);
+                const double p = U.getPressure(U.states[i]);
+                file << std::setprecision(4) << std::get<0>(elem) << ',' 
+                     << i * dx << ',' << rho << ',' << u << ',' << p << std::endl;
             }
         }
     }
