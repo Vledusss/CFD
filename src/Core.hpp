@@ -11,35 +11,42 @@
 using indexType = std::size_t;
 
 template<typename Equation, indexType N>
-struct Godunov {
-    static void solve(Equation& eq, const double dx, const double dt) {
-        assert(dx > 0);
-        assert(dt > 0);
-
-        const double ratio = dt / dx;
-
-        std::array<double, N + 1> tempState;
-        std::array<double, N + 1> F;
-
-        tempState.front() = eq.state.front(); // ГУ
-        tempState.back() = eq.state.back();   // ГУ
-
-        for (indexType j = 0; j < N - 1; ++j) {
-            tempState[j + 1] = eq.calcU(eq.state[j], eq.state[j + 1]);
-        }
-
-        for (indexType j = 0; j < N + 1; ++j) {
-            F[j] = eq.calcF(j, tempState[j]);
-        }
-
-        for (indexType j = 1; j <= N; ++j) {
-            eq.state[j - 1] -= ratio * (F[j] - F[j - 1]);
-        }
-    }
+struct Core {
+    static void solve(std::vector<std::tuple<double, Equation>>& eq, 
+                      const double startTime, const double endTime,
+                      const double dx, const double CFL);
 };
 
+// template<typename Equation, indexType N>
+// struct Core {
+//     static void solve(Equation& eq, const double dx, const double dt) {
+//         assert(dx > 0);
+//         assert(dt > 0);
+
+//         const double ratio = dt / dx;
+
+//         std::array<double, N + 1> tempState;
+//         std::array<double, N + 1> F;
+
+//         tempState.front() = eq.state.front(); // ГУ
+//         tempState.back() = eq.state.back();   // ГУ
+
+//         for (indexType j = 0; j < N - 1; ++j) {
+//             tempState[j + 1] = eq.calcU(eq.state[j], eq.state[j + 1]);
+//         }
+
+//         for (indexType j = 0; j < N + 1; ++j) {
+//             F[j] = eq.calcF(j, tempState[j]);
+//         }
+
+//         for (indexType j = 1; j <= N; ++j) {
+//             eq.state[j - 1] -= ratio * (F[j] - F[j - 1]);
+//         }
+//     }
+// };
+
 template<indexType N>
-struct Godunov<Euler::Equation<N>, N> {
+struct Core<Euler::Equation<N>, N> {
     static void solve(std::vector<std::tuple<double, Euler::Equation<N>>>& eq, 
                       const double startTime, const double endTime,
                       const double dx, const double CFL = 0.2) {

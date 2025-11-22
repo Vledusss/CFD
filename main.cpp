@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <fstream>
 
-#include "Godunov.hpp"
+#include "Core.hpp"
 #include "Burgers/Burgers.hpp"
 #include "Euler/EulerEquations.hpp"
 
@@ -27,7 +27,7 @@ void testEuler() {
 
     if (file.is_open()) {
         file << "t,x,rho,u,p" << std::endl;
-        Godunov<Euler::Equation<N>, N>::solve(eq, startTime, endTime, dx, 0.4);
+        Core<Euler::Equation<N>, N>::solve(eq, startTime, endTime, dx, 0.4);
         std::cout << "DONE" << std::endl;
 
         for (const auto& elem : eq) {
