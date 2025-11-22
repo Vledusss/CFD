@@ -92,13 +92,11 @@ struct Core<Euler::Equation<N>, N> {
             const double timeStep = CFL * dx / maxVelocity;
             std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
 
-            using LFSolver = Solvers::LaxFriedrichs<Euler::State, Euler::Flux, Euler::Equation<N>>;
             using HLLSolver = Solvers::HLL<Euler::State, Euler::Flux, Euler::Equation<N>>;
             using HLLCSolver = Solvers::HLLC<Euler::State, Euler::Flux, Euler::Equation<N>>;
 
             for (indexType i = 1; i < N; ++i) {
                 F[i] = HLLCSolver::solve(solution, i);
-                // F[i] = LFSolver::solve(solution, i, dx, timeStep);
             }
 
             for (indexType i = 0; i < N; ++i) {
@@ -111,5 +109,10 @@ struct Core<Euler::Equation<N>, N> {
 
             t += timeStep;
         }
+
+        for (indexType i = 0; i < 26; ++i) {
+            std::cout << '-';
+        }
+        std::cout << std::endl;
     }
 };

@@ -19,7 +19,7 @@ void testEuler() {
     const double dx = 1;
     
     const double startTime = 0;
-    const double endTime = 20;
+    const double endTime = 15;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
     
@@ -28,21 +28,26 @@ void testEuler() {
     if (file.is_open()) {
         file << "t,x,rho,u,p" << std::endl;
         Core<Euler::Equation<N>, N>::solve(eq, startTime, endTime, dx, 0.4);
-        std::cout << "DONE" << std::endl;
+        std::cout << "Recording..." << std::endl;
 
         for (const auto& elem : eq) {
             for (indexType i = 0; i < N; ++i) {
+                const auto t = std::get<0>(elem);
                 const auto U = std::get<1>(elem);
-                const double rho = U.states[i].rho;
-                const double u = U.getVelocity(U.states[i]);
-                const double p = U.getPressure(U.states[i]);
-                file << std::setprecision(4) << std::get<0>(elem) << ',' 
-                     << i * dx << ',' << rho << ',' << u << ',' << p << std::endl;
+
+                const auto rho = U.states[i].rho;
+                const auto u = U.getVelocity(U.states[i]);
+                const auto p = U.getPressure(U.states[i]);
+
+                file << std::setprecision(4) << t << ',' << i * dx 
+                     << ',' << rho << ',' << u << ',' << p << std::endl;
             }
         }
     }
     
     file.close();
+
+    std::cout << "Recording complete" << std::endl;
 }
 
 int main() {
