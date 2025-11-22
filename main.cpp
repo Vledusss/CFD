@@ -3,7 +3,8 @@
 #include <fstream>
 
 #include "Core.hpp"
-#include "Burgers/Burgers.hpp"
+
+#include "Burgers/BurgersEquation.hpp"
 #include "Euler/EulerEquations.hpp"
 
 void testEuler() {

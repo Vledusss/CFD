@@ -4,7 +4,9 @@
 #include <array>
 
 // #include "Core" // eigen
+#include "Burgers/BurgersEquation.hpp"
 #include "Euler/EulerEquations.hpp"
+
 #include "solvers/HLL.hpp"
 #include "solvers/HLLC.hpp"
 
@@ -17,33 +19,48 @@ struct Core {
                       const double dx, const double CFL);
 };
 
-// template<typename Equation, indexType N>
-// struct Core {
-//     static void solve(Equation& eq, const double dx, const double dt) {
-//         assert(dx > 0);
-//         assert(dt > 0);
+template<indexType N>
+struct Core<Burgers::Equation<N>, N> {
+    static void solve(std::vector<std::tuple<double, Burgers::Equation<N>>>& eq, 
+                      const double startTime, const double endTime,
+                      const double dx, const double CFL = 0.5) {
+        assert(startTime < endTime);
+        assert(dx > 0); 
 
-//         const double ratio = dt / dx;
+        const double dt = CFL * dx;
 
-//         std::array<double, N + 1> tempState;
-//         std::array<double, N + 1> F;
+        std::array<double, N + 1> F;
+        std::array<double, N + 1> edgeStates;
 
-//         tempState.front() = eq.state.front(); // ГУ
-//         tempState.back() = eq.state.back();   // ГУ
+        double t = startTime; 
 
-//         for (indexType j = 0; j < N - 1; ++j) {
-//             tempState[j + 1] = eq.calcU(eq.state[j], eq.state[j + 1]);
-//         }
+        while (t < endTime) {
+            std::array<double, N> solution = std::get<1>(eq.back());;
 
-//         for (indexType j = 0; j < N + 1; ++j) {
-//             F[j] = eq.calcF(j, tempState[j]);
-//         }
+            edgeStates.fill(0);
+            F.fill(0);
 
-//         for (indexType j = 1; j <= N; ++j) {
-//             eq.state[j - 1] -= ratio * (F[j] - F[j - 1]);
-//         }
-//     }
-// };
+            edgeStates.front() = solution.states.front(); // ГУ
+            edgeStates.back() = solution.states.back();   // ГУ
+
+            for (indexType i = 0; i < N - 1; ++i) {
+                edgeStates[i + 1] = solution.calcU(solution.states[i], solution.states[i + 1]);
+            }
+
+            for (indexType i = 0; i < N + 1; ++i) {
+                F[i] = eq.calcF(i, edgeStates[i]);
+            }
+
+            for (indexType i = 0; i < N; ++i) {
+                solution.states[i] -= dt / dx * (F[i + 1] - F[i]);
+            }
+
+            eq.emplace_back(std::make_tuple(t, solution));
+
+            t += dt;
+        }
+    }
+};
 
 template<indexType N>
 struct Core<Euler::Equation<N>, N> {
@@ -53,11 +70,11 @@ struct Core<Euler::Equation<N>, N> {
         assert(startTime < endTime);
         assert(dx > 0);
 
-        double t = startTime;  
-        std::array<Euler::Flux, N + 1> F;                 
+        std::array<Euler::Flux, N + 1> F;    
         
-        while (t < endTime)
-        {
+        double t = startTime;  
+        
+        while (t < endTime) {
             Euler::Equation<N> solution = std::get<1>(eq.back());
             F.fill(Euler::Flux(0, 0, 0));
 
