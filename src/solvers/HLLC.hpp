@@ -17,11 +17,19 @@ struct HLLC {
         const double pL = eq.getPressure(left);
         const double pR = eq.getPressure(right);
         
-        const double uL = eq.getVelocity(left);
-        const double uR = eq.getVelocity(right);
-
         const double rhoL = left.rho;
         const double rhoR = right.rho;
+
+        const bool densityCheck = std::max(rhoL / rhoR, rhoR / rhoL) > 5;
+        const bool pressureCheck = std::max(pL / pR, pR / pL) > 3;
+
+        if (densityCheck || pressureCheck) { 
+            std::cout << "HLL fallback!" << std::endl;
+            return HLL<State, Flux, Equation>::solve(eq, i); 
+        }
+        
+        const double uL = eq.getVelocity(left);
+        const double uR = eq.getVelocity(right);
         
         const double cL = std::sqrt(eq.getGamma() * pL / left.rho);
         const double cR = std::sqrt(eq.getGamma() * pR / right.rho);
