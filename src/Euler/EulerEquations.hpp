@@ -39,7 +39,7 @@ public:
         const double u = getVelocity(state);
         
         return Flux(
-            state.rho_u,                                    // ρu
+            state.rho_u,              // ρu
             state.rho_u * u + p,      // ρu² + p  
             u * (state.E + p)         // u(E + p)
         );
