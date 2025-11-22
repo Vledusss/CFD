@@ -36,11 +36,12 @@ public:
     
     Flux calcFlux(const State& state) const {
         const double p = getPressure(state);
+        const double u = getVelocity(state);
         
         return Flux(
-            state.rho_u,                            // ρu
-            state.rho_u * state.rho_u + p,          // ρu² + p  
-            state.rho_u * (state.E + p)         // u(ρE + p)
+            state.rho_u,              // ρu
+            state.rho_u * u + p,      // ρu² + p  
+            u * (state.E + p)         // u(E + p)
         );
     }
 

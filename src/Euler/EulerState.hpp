@@ -16,13 +16,18 @@ struct State {
     }
 
     State& operator-=(const Flux& flux) {
-        auto validate = [](auto a, auto b) {
-            return a - b > 0 ? a - b : 1e-10;
-        };
+        const double eps = 1e-10; 
 
-        rho = validate(rho, flux.density);
-        rho_u = validate(rho_u, flux.momentum);
-        E = validate(E, flux.energy);
+        const double temp_rho = rho - flux.density;
+        const double temp_rho_u = rho_u - flux.momentum;
+        const double temp_E = E - flux.energy;
+
+        const double K = 0.5 * (temp_rho_u * temp_rho_u) / std::max(temp_rho, eps);
+        const double e = temp_E - K; // ~ p
+        E = e > eps ? temp_E : eps + K;
+
+        rho = std::max(temp_rho, eps);
+        rho_u = rho > eps ? temp_rho_u : std::copysign(std::sqrt(2 * rho * (E - eps)), temp_rho_u);
 
         return *this;
     }

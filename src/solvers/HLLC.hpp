@@ -17,11 +17,19 @@ struct HLLC {
         const double pL = eq.getPressure(left);
         const double pR = eq.getPressure(right);
         
-        const double uL = eq.getVelocity(left);
-        const double uR = eq.getVelocity(right);
-
         const double rhoL = left.rho;
         const double rhoR = right.rho;
+
+        const bool highDensity = std::max(rhoL / rhoR, rhoR / rhoL) > 10;
+        const bool highPressure = std::max(pL / pR, pR / pL) > 10;
+
+        if (highDensity || highPressure) { 
+            // std::cout << "HLL fallback!" << std::endl;
+            return HLL<State, Flux, Equation>::solve(eq, i); 
+        }
+        
+        const double uL = eq.getVelocity(left);
+        const double uR = eq.getVelocity(right);
         
         const double cL = std::sqrt(eq.getGamma() * pL / left.rho);
         const double cR = std::sqrt(eq.getGamma() * pR / right.rho);
@@ -30,16 +38,11 @@ struct HLLC {
         const double SR = std::max(uL + cL, uR + cR);
 
         const double denom = rhoL * (SL - uL) - rhoR * (SR - uR);
-
-        if (denom < 1e-10) { return HLL<State, Flux, Equation>::solve(eq, i); }
-
         const double SM = (pR - pL + rhoL * uL * (SL - uL) - rhoR * uR * (SR - uR)) / denom;
 
         const double pStarL = pL + rhoL * (SL - uL) * (SM - uL); 
         const double pStarR = pR + rhoR * (SR - uR) * (SM - uR); 
         const double pStar = (pStarL + pStarR) / 2.;
-
-        if (pStar < 1e-10) { return HLL<State, Flux, Equation>::solve(eq, i); }
         
         const Flux FL = eq.calcFlux(left);
         const Flux FR = eq.calcFlux(right);

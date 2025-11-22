@@ -7,6 +7,7 @@
 #include "Burgers/BurgersEquation.hpp"
 #include "Euler/EulerEquations.hpp"
 
+#include "solvers/LaxFriedrichs.hpp"
 #include "solvers/HLL.hpp"
 #include "solvers/HLLC.hpp"
 
@@ -66,7 +67,7 @@ template<indexType N>
 struct Core<Euler::Equation<N>, N> {
     static void solve(std::vector<std::tuple<double, Euler::Equation<N>>>& eq, 
                       const double startTime, const double endTime,
-                      const double dx, const double CFL = 0.2) {
+                      const double dx, const double CFL = 0.5) {
         assert(startTime < endTime);
         assert(dx > 0);
 
@@ -91,22 +92,13 @@ struct Core<Euler::Equation<N>, N> {
             const double timeStep = CFL * dx / maxVelocity;
             std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
 
+            using LFSolver = Solvers::LaxFriedrichs<Euler::State, Euler::Flux, Euler::Equation<N>>;
             using HLLSolver = Solvers::HLL<Euler::State, Euler::Flux, Euler::Equation<N>>;
             using HLLCSolver = Solvers::HLLC<Euler::State, Euler::Flux, Euler::Equation<N>>;
 
             for (indexType i = 1; i < N; ++i) {
-                const double rhoL = solution.states[i - 1].rho;
-                const double rhoR = solution.states[i].rho;
-
-                const double pL = solution.getPressure(solution.states[i - 1]);
-                const double pR = solution.getPressure(solution.states[i]);
-
-                const bool densityCheck = std::max(rhoL / rhoR, rhoR / rhoL) > 5;
-                const bool pressureCheck = std::max(pL / pR, rhoR / pL) > 3;
-
-                F[i] = densityCheck || pressureCheck ?
-                       HLLSolver::solve(solution, i) :
-                       HLLCSolver::solve(solution, i);
+                F[i] = HLLCSolver::solve(solution, i);
+                // F[i] = LFSolver::solve(solution, i, dx, timeStep);
             }
 
             for (indexType i = 0; i < N; ++i) {
