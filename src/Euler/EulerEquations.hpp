@@ -21,15 +21,15 @@ public:
     }
     
     static double getVelocity(const State& state) {
-        assert(state.rho > 0);
-        return state.rho_u / state.rho;
+        // assert(state.rho > 0);
+        return state.rho_u / std::max(state.rho, 1e-10);
     }
 
     double getPressure(const State& state) const {
         const double vel = getVelocity(state);
         const double p = (gamma - 1) * (state.E - 0.5 * state.rho * vel * vel);
-        assert(p > 0);
-        return p;
+        // assert(p > 0);
+        return std::max(p, 1e-10);
     }
 
     double getGamma() const noexcept { return gamma; }

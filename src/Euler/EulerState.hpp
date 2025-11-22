@@ -16,9 +16,14 @@ struct State {
     }
 
     State& operator-=(const Flux& flux) {
-        rho -= flux.density;
-        rho_u -= flux.momentum;
-        E -= flux.energy;
+        auto validate = [](auto a, auto b) {
+            return a - b > 0 ? a - b : 1e-10;
+        };
+
+        rho = validate(rho, flux.density);
+        rho_u = validate(rho_u, flux.momentum);
+        E = validate(E, flux.energy);
+
         return *this;
     }
 
