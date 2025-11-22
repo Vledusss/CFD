@@ -1,5 +1,7 @@
 #pragma once 
 
+#include <algorithm>
+
 #include "EulerFlux.hpp"
 
 namespace Euler {
@@ -27,7 +29,7 @@ struct State {
         E = e > eps ? temp_E : eps + K;
 
         rho = std::max(temp_rho, eps);
-        rho_u = rho > eps ? temp_rho_u : std::copysign(std::sqrt(2 * rho * (E - eps)), temp_rho_u);
+        rho_u = rho > eps ? temp_rho_u : 0.0;
 
         return *this;
     }

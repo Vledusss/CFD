@@ -13,14 +13,13 @@ void testEuler() {
     
     Euler::Equation<N> initial;
     
-    // НУ (ρ, u, p)
-    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::State(1.0, 10.0, 1.0); }
-    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::State(1.0, 0.0, 0.5); }
+    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::State(1.0, 100.0, 1.0); }  // НУ (ρ, u, p)
+    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::State(0.8, 0.0, 0.5); }    // НУ (ρ, u, p)
     
     const double dx = 1;
     
     const double startTime = 0;
-    const double endTime = 150;
+    const double endTime = 20;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
     
