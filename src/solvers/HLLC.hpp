@@ -24,7 +24,7 @@ struct HLLC {
         const bool pressureCheck = std::max(pL / pR, pR / pL) > 3;
 
         if (densityCheck || pressureCheck) { 
-            std::cout << "HLL fallback!" << std::endl;
+            // std::cout << "HLL fallback!" << std::endl;
             return HLL<State, Flux, Equation>::solve(eq, i); 
         }
         
@@ -46,11 +46,11 @@ struct HLLC {
         const double pStarL = pL + rhoL * (SL - uL) * (SM - uL); 
         const double pStarR = pR + rhoR * (SR - uR) * (SM - uR); 
         const double pStar = (pStarL + pStarR) / 2.;
-
-        if (pStar < 1e-10) { return HLL<State, Flux, Equation>::solve(eq, i); }
         
         const Flux FL = eq.calcFlux(left);
         const Flux FR = eq.calcFlux(right);
+
+        if (pStar < 1e-10) { return (FL + FR) / 2.; }
 
         if (SL >= 0) { return FL; } 
         else if (SR <= 0) { return FR; } 
