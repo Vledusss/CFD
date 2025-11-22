@@ -19,7 +19,7 @@ void testEuler() {
     const double dx = 1;
     
     const double startTime = 0;
-    const double endTime = 400;
+    const double endTime = 325;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
     
@@ -32,7 +32,7 @@ void testEuler() {
 
         for (const auto& elem : eq) {
             for (indexType i = 0; i < N; ++i) {
-                if (i * dx > 100 && i * dx < 900) {
+                if (i * dx > 0.1 * N && i * dx < 0.9 * N) {
                     const auto U = std::get<1>(elem);
                     const double rho = U.states[i].rho;
                     const double u = U.getVelocity(U.states[i]);
