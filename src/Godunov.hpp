@@ -65,7 +65,7 @@ struct Godunov<Euler::Equation<N>, N> {
             }
 
             const double timeStep = CFL * dx / maxVelocity;
-            // std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
+            std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
 
             using HLLSolver = Solvers::HLL<Euler::State, Euler::Flux, Euler::Equation<N>>;
             using HLLCSolver = Solvers::HLLC<Euler::State, Euler::Flux, Euler::Equation<N>>;
