@@ -1,13 +1,9 @@
-file(GLOB_RECURSE SOURCE *.cpp *.hpp)
-
-add_library(${PROJECT_NAME} STATIC ${SOURCE})
+add_library(${PROJECT_NAME} INTERFACE)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC eigen)
+target_link_libraries(${PROJECT_NAME} INTERFACE eigen)
 
-include_directories()
-
-target_include_directories(${PROJECT_NAME} PUBLIC 
+target_include_directories(${PROJECT_NAME} INTERFACE 
     ${CMAKE_CURRENT_SOURCE_DIR} 
     ${CMAKE_CURRENT_SOURCE_DIR}/equations)
