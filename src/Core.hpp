@@ -4,7 +4,8 @@
 #include <array>
 
 #include "Burgers/BurgersEquation.hpp"
-#include "Euler/EulerEquations.hpp"
+#include "Euler/Simple/EulerEquations.hpp"
+#include "Euler/RF/EulerEquations.hpp"
 
 #include "solvers/LaxFriedrichs.hpp"
 #include "solvers/HLL.hpp"
@@ -81,20 +82,20 @@ struct Core<Burgers::Equation<N>, N> {
 };
 
 template<indexType N>
-struct Core<Euler::Equation<N>, N> {
-    static void solve(std::vector<std::tuple<double, Euler::Equation<N>>>& eq, 
+struct Core<Euler::Simple::Equation<N>, N> {
+    static void solve(std::vector<std::tuple<double, Euler::Simple::Equation<N>>>& eq, 
                       const double startTime, const double endTime,
                       const double dx, const double CFL = 0.5) {
         assert(startTime < endTime);
         assert(dx > 0);
 
-        std::array<Euler::Flux, N + 1> F;    
+        std::array<Euler::Simple::Flux, N + 1> F;    
         
         double t = startTime;  
         
         while (t < endTime) {
-            Euler::Equation<N> solution = std::get<1>(eq.back());
-            F.fill(Euler::Flux(0, 0, 0));
+            Euler::Simple::Equation<N> solution = std::get<1>(eq.back());
+            F.fill(Euler::Simple::Flux(0, 0, 0));
 
             F.front() = solution.calcFlux(solution.states.front()); // перенос из центра
             F.back() = solution.calcFlux(solution.states.back());   // перенос из центра
@@ -109,8 +110,8 @@ struct Core<Euler::Equation<N>, N> {
             const double timeStep = CFL * dx / maxVelocity;
             std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
 
-            using HLLSolver = Solvers::HLL<Euler::State, Euler::Flux, Euler::Equation<N>>;
-            using HLLCSolver = Solvers::HLLC<Euler::State, Euler::Flux, Euler::Equation<N>>;
+            using HLLSolver = Solvers::HLL<Euler::Simple::State, Euler::Simple::Flux, Euler::Simple::Equation<N>>;
+            using HLLCSolver = Solvers::HLLC<Euler::Simple::State, Euler::Simple::Flux, Euler::Simple::Equation<N>>;
 
             for (indexType i = 1; i < N; ++i) {
                 F[i] = HLLCSolver::solve(solution, i);

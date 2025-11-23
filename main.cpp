@@ -5,7 +5,8 @@
 #include "Core.hpp"
 
 #include "Burgers/BurgersEquation.hpp"
-#include "Euler/EulerEquations.hpp"
+#include "Euler/Simple/EulerEquations.hpp"
+#include "Euler/RF/EulerEquations.hpp"
 
 void testBurgers() {
     const indexType N = 1000; // по пространству
@@ -42,14 +43,14 @@ void testBurgers() {
     std::cout << "Recording complete" << std::endl;
 }
 
-void testEuler() {
+void testEulerSimple() {
     const indexType N = 1000;                                   // по пространству
-    std::vector<std::tuple<double, Euler::Equation<N>>> eq;     // gamma = 1.4
+    std::vector<std::tuple<double, Euler::Simple::Equation<N>>> eq;     // gamma = 1.4
     
-    Euler::Equation<N> initial;
+    Euler::Simple::Equation<N> initial;
     
-    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::State(1.0, 100.0, 1.0); }  // НУ (ρ, u, p)
-    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::State(0.8, 0.0, 0.5); }    // НУ (ρ, u, p)
+    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::Simple::State(1.0, 100.0, 1.0); }  // НУ (ρ, u, p)
+    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::Simple::State(0.8, 0.0, 0.5); }    // НУ (ρ, u, p)
     
     const double dx = 1;
     
@@ -62,7 +63,7 @@ void testEuler() {
 
     if (file.is_open()) {
         file << "t,x,rho,u,p" << std::endl;
-        Core<Euler::Equation<N>, N>::solve(eq, startTime, endTime, dx, 0.4);
+        Core<Euler::Simple::Equation<N>, N>::solve(eq, startTime, endTime, dx, 0.4);
         std::cout << "Recording..." << std::endl;
 
         for (const auto& elem : eq) {
@@ -86,6 +87,6 @@ void testEuler() {
 }
 
 int main() {
-    testEuler();
+    testEulerSimple();
     // testBurgers();
 }

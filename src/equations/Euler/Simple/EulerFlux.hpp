@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-namespace Euler {
+namespace Euler::Simple {
 
 struct Flux {
     double density;           // ρu
@@ -38,4 +38,4 @@ struct Flux {
     }
 };
 
-}  // namespace Euler
+}  // namespace Euler::Simple

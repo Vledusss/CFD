@@ -4,7 +4,7 @@
 
 #include "EulerFlux.hpp"
 
-namespace Euler {
+namespace Euler::RF {
 
 struct State {
     double rho;
@@ -74,4 +74,4 @@ struct State {
     double gamma;
 };
 
-}  // namespace Euler
+}  // namespace Euler::RF
