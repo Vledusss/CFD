@@ -7,6 +7,41 @@
 #include "Burgers/BurgersEquation.hpp"
 #include "Euler/EulerEquations.hpp"
 
+void testBurgers() {
+    const indexType N = 1000; // по пространству
+    std::vector<std::tuple<double, Burgers::Equation<N>>> eq;
+    
+    Burgers::Equation<N> initial(-10, 10);
+    
+    const double dx = 1;
+    
+    const double startTime = 0;
+    const double endTime = 10;
+
+    eq.emplace_back(std::make_tuple(startTime, initial));
+    
+    std::ofstream file("res.csv");
+
+    if (file.is_open()) {
+        file << "t,x,u" << std::endl;
+        Core<Burgers::Equation<N>, N>::solve(eq, startTime, endTime, dx);
+        std::cout << "Recording..." << std::endl;
+
+        for (const auto& elem : eq) {
+            for (indexType i = 0; i < N; ++i) {
+                const auto t = std::get<0>(elem);
+                const auto u = std::get<1>(elem).states[i];
+
+                file << std::setprecision(4) << t << ',' << i * dx << ',' << u << std::endl;
+            }
+        }
+    }
+    
+    file.close();
+
+    std::cout << "Recording complete" << std::endl;
+}
+
 void testEuler() {
     const indexType N = 1000;                                   // по пространству
     std::vector<std::tuple<double, Euler::Equation<N>>> eq;     // gamma = 1.4
@@ -51,5 +86,6 @@ void testEuler() {
 }
 
 int main() {
-    testEuler();
+    // testEuler();
+    testBurgers();
 }

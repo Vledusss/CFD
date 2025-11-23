@@ -28,15 +28,13 @@ struct Core<Burgers::Equation<N>, N> {
         assert(startTime < endTime);
         assert(dx > 0); 
 
-        const double dt = CFL * dx;
-
         std::array<double, N + 1> F;
         std::array<double, N + 1> edgeStates;
 
         double t = startTime; 
 
         while (t < endTime) {
-            std::array<double, N> solution = std::get<1>(eq.back());;
+            Burgers::Equation<N> solution = std::get<1>(eq.back());;
 
             edgeStates.fill(0);
             F.fill(0);
@@ -44,22 +42,36 @@ struct Core<Burgers::Equation<N>, N> {
             edgeStates.front() = solution.states.front(); // ГУ
             edgeStates.back() = solution.states.back();   // ГУ
 
+            double maxVelocity = 0.0;
+
+            for (const auto& u : solution.states) {
+                maxVelocity = std::max(maxVelocity, u);
+            }
+
+            const double timeStep = CFL * dx / maxVelocity;
+            std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
+
             for (indexType i = 0; i < N - 1; ++i) {
                 edgeStates[i + 1] = solution.calcU(solution.states[i], solution.states[i + 1]);
             }
 
             for (indexType i = 0; i < N + 1; ++i) {
-                F[i] = eq.calcF(i, edgeStates[i]);
+                F[i] = solution.calcF(i, edgeStates[i]);
             }
 
             for (indexType i = 0; i < N; ++i) {
-                solution.states[i] -= dt / dx * (F[i + 1] - F[i]);
+                solution.states[i] -= timeStep / dx * (F[i + 1] - F[i]);
             }
 
             eq.emplace_back(std::make_tuple(t, solution));
 
-            t += dt;
+            t += timeStep;
         }
+
+        for (indexType i = 0; i < 26; ++i) {
+            std::cout << '-';
+        }
+        std::cout << std::endl;
     }
 };
 
