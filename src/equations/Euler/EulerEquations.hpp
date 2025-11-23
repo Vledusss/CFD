@@ -10,33 +10,16 @@ using indexType = size_t;
 namespace Euler {
 
 template<indexType N>
-class Equation {
-private:
-    double gamma;
-public:
+struct Equation {
     std::array<State, N> states;
     
-    Equation(double g = 1.4) : gamma(g) {
-        for (auto& state : states) { state = State(0, 0, 0); }
+    Equation(const double gamma = 1.4) {
+        for (auto& state : states) { state = State(0, 0, 0, gamma); }
     }
-    
-    static double getVelocity(const State& state) {
-        // assert(state.rho > 0);
-        return state.rho_u / std::max(state.rho, 1e-10);
-    }
-
-    double getPressure(const State& state) const {
-        const double vel = getVelocity(state);
-        const double p = (gamma - 1) * (state.E - 0.5 * state.rho * vel * vel);
-        // assert(p > 0);
-        return std::max(p, 1e-10);
-    }
-
-    double getGamma() const noexcept { return gamma; }
     
     Flux calcFlux(const State& state) const {
-        const double p = getPressure(state);
-        const double u = getVelocity(state);
+        const double p = state.getPressure();
+        const double u = state.getVelocity();
         
         return Flux(
             state.rho_u,              // ρu

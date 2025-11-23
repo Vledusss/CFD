@@ -12,9 +12,24 @@ struct State {
     double E;
     
     State(const double density = 0, const double velocity = 0, 
-          const double pressure = 0, const double gamma = 1.4) : rho(density) {
+          const double pressure = 0, const double g = 1.4) : rho(density), gamma(g) {
         rho_u = density * velocity;
         E = pressure / (gamma - 1) + 0.5 * rho * velocity * velocity;
+    }
+
+    
+    double getGamma() const noexcept { return gamma; }
+    
+    double getVelocity() const {
+        // assert(rho > 0);
+        return rho_u / std::max(rho, 1e-10);
+    }
+
+    double getPressure() const {
+        const double u = getVelocity();
+        const double p = (gamma - 1) * (E - 0.5 * rho * u * u);
+        // assert(p > 0);
+        return std::max(p, 1e-10);
     }
 
     State& operator-=(const Flux& flux) {
@@ -53,6 +68,10 @@ struct State {
     Flux operator*(const double scalar) const {
         return Flux(rho * scalar, rho_u * scalar, E * scalar);
     }
+
+    private:
+
+    double gamma;
 };
 
 }  // namespace Euler

@@ -71,8 +71,8 @@ void testEuler() {
                 const auto U = std::get<1>(elem);
 
                 const auto rho = U.states[i].rho;
-                const auto u = U.getVelocity(U.states[i]);
-                const auto p = U.getPressure(U.states[i]);
+                const auto u = U.states[i].getVelocity();
+                const auto p = U.states[i].getPressure();
 
                 file << std::setprecision(4) << t << ',' << i * dx 
                      << ',' << rho << ',' << u << ',' << p << std::endl;
@@ -86,6 +86,6 @@ void testEuler() {
 }
 
 int main() {
-    // testEuler();
-    testBurgers();
+    testEuler();
+    // testBurgers();
 }

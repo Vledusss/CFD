@@ -11,13 +11,6 @@ struct Flux {
     
     Flux(double fr = 0, double fm = 0, double fe = 0)
         : density(fr), momentum(fm), energy(fe) {}
-    
-    Flux& operator-=(const Flux& other) {
-        density -= other.density;
-        momentum -= other.momentum;
-        energy -= other.energy;
-        return *this;
-    }
 
     Flux operator+(const Flux& other) const {
         return Flux(

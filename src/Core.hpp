@@ -102,8 +102,8 @@ struct Core<Euler::Equation<N>, N> {
             double maxVelocity = 0.0;
 
             for (const auto& state : solution.states) {
-                const double c = std::sqrt(solution.getGamma() * solution.getPressure(state) / state.rho);
-                maxVelocity = std::max(maxVelocity, c + std::abs(solution.getVelocity(state)));
+                const double c = std::sqrt(state.getGamma() * state.getPressure() / state.rho);
+                maxVelocity = std::max(maxVelocity, c + std::abs(state.getVelocity()));
             }
 
             const double timeStep = CFL * dx / maxVelocity;

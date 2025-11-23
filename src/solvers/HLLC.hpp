@@ -14,8 +14,8 @@ struct HLLC {
         const State left = eq.states[i - 1];
         const State right = eq.states[i];
 
-        const double pL = eq.getPressure(left);
-        const double pR = eq.getPressure(right);
+        const double pL = left.getPressure();
+        const double pR = right.getPressure();
         
         const double rhoL = left.rho;
         const double rhoR = right.rho;
@@ -28,11 +28,11 @@ struct HLLC {
             return HLL<State, Flux, Equation>::solve(eq, i); 
         }
         
-        const double uL = eq.getVelocity(left);
-        const double uR = eq.getVelocity(right);
+        const double uL = left.getVelocity();
+        const double uR = right.getVelocity();
         
-        const double cL = std::sqrt(eq.getGamma() * pL / left.rho);
-        const double cR = std::sqrt(eq.getGamma() * pR / right.rho);
+        const double cL = std::sqrt(left.getGamma() * pL / left.rho);
+        const double cR = std::sqrt(right.getGamma() * pR / right.rho);
         
         const double SL = std::min(uL - cL, uR - cR);
         const double SR = std::max(uL + cL, uR + cR);
