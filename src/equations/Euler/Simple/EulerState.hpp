@@ -50,19 +50,19 @@ struct State {
     }
 
     State operator+(const State& other) const {
-        return State(
+        return {
             rho + other.rho,
             rho_u + other.rho_u,
             E + other.E
-        );
+        };
     }
 
     State operator-(const State& other) const {
-        return State(
+        return {
             rho - other.rho,
             rho_u - other.rho_u,
             E - other.E
-        );
+        };
     }
     
     Flux operator*(const double scalar) const {

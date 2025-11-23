@@ -29,12 +29,20 @@ struct Flux {
     }
     
     Flux operator*(const double scalar) const {
-        return {density * scalar, momentum * scalar, energy * scalar};
+        return Flux(
+            density * scalar, 
+            momentum * scalar, 
+            energy * scalar
+        );
     }
 
     Flux operator/(const double scalar) const {
         assert(scalar != 0.0);
-        return {density / scalar, momentum / scalar, energy / scalar};
+        return Flux(
+            density / scalar, 
+            momentum / scalar, 
+            energy / scalar
+        );
     }
 };
 
