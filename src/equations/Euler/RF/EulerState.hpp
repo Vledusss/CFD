@@ -10,11 +10,14 @@ struct State {
     double rho;
     double rho_u;
     double E;
+    double rho_Yp;
     
     State(const double density = 0, const double velocity = 0, 
-          const double pressure = 0, const double g = 1.4) : rho(density), gamma(g) {
+          const double pressure = 0, const double product = 0,
+          const double g = 1.4) : rho(density), gamma(g) {
         rho_u = density * velocity;
         E = pressure / (gamma - 1) + 0.5 * rho * velocity * velocity;
+        rho_Yp = density * product;
     }
 
     
@@ -38,6 +41,7 @@ struct State {
         const double temp_rho = rho - flux.density;
         const double temp_rho_u = rho_u - flux.momentum;
         const double temp_E = E - flux.energy;
+        const double temp_rho_Yp = rho_Yp - flux.product;
 
         const double K = 0.5 * (temp_rho_u * temp_rho_u) / std::max(temp_rho, eps);
         const double e = temp_E - K; // ~ p
@@ -45,28 +49,36 @@ struct State {
 
         rho = std::max(temp_rho, eps);
         rho_u = rho > eps ? temp_rho_u : 0.0;
+        rho_Yp = rho > eps ? temp_rho_Yp : 0.0;
 
         return *this;
     }
 
     State operator+(const State& other) const {
-        return State(
+        return {
             rho + other.rho,
             rho_u + other.rho_u,
-            E + other.E
-        );
+            E + other.E,
+            rho_Yp + other.rho_Yp
+        };
     }
 
     State operator-(const State& other) const {
-        return State(
+        return {
             rho - other.rho,
             rho_u - other.rho_u,
-            E - other.E
-        );
+            E - other.E,
+            rho_Yp - other.rho_Yp
+        };
     }
     
     Flux operator*(const double scalar) const {
-        return Flux(rho * scalar, rho_u * scalar, E * scalar);
+        return Flux(
+            rho * scalar, 
+            rho_u * scalar, 
+            E * scalar, 
+            rho_Yp * scalar
+        );
     }
 
     private:
