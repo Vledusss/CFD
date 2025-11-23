@@ -3,7 +3,6 @@
 #include <tuple>
 #include <array>
 
-// #include "Core" // eigen
 #include "Burgers/BurgersEquation.hpp"
 #include "Euler/EulerEquations.hpp"
 
@@ -55,9 +54,15 @@ struct Core<Burgers::Equation<N>, N> {
                 edgeStates[i + 1] = solution.calcU(solution.states[i], solution.states[i + 1]);
             }
 
+            using LFSolver = Solvers::LaxFriedrichs<double, double, Burgers::Equation<N>>;
+
             for (indexType i = 0; i < N + 1; ++i) {
-                F[i] = solution.calcF(i, edgeStates[i]);
+                // F[i] = solution.calcFlux(edgeStates[i], i); // точное решение
+                F[i] = LFSolver::solve(solution, i, dx, timeStep);
             }
+
+            F[0] = solution.calcFlux(edgeStates[0], 0); // ГУ для LF
+            F[N] = solution.calcFlux(edgeStates[N], N); // ГУ для LF
 
             for (indexType i = 0; i < N; ++i) {
                 solution.states[i] -= timeStep / dx * (F[i + 1] - F[i]);

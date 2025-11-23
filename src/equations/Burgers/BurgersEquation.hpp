@@ -30,7 +30,7 @@ struct Equation
         }
     }
 
-    double calcF(const indexType j, const double U) { 
+    double calcFlux(const double U, const indexType j = 0) const { 
         if (j == 0 || j == N) { return U * U / 2.; }
         if (states[j - 1] < states[j]) {
             if (states[j - 1] >= 0) { return states[j - 1] * states[j - 1] / 2.; }
@@ -40,7 +40,7 @@ struct Equation
         return U * U / 2.; 
     }
 
-    double calcU(const double UL, const double UR) {
+    static double calcU(const double UL, const double UR) {
         return UL + UR > 0 ? UL : UR;
     }
 };
