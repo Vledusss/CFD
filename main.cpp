@@ -44,7 +44,7 @@ void testBurgers() {
 }
 
 void testEulerSimple() {
-    const indexType N = 1000;                                   // по пространству
+    const indexType N = 1000;                                           // по пространству
     std::vector<std::tuple<double, Euler::Simple::Equation<N>>> eq;     // gamma = 1.4
     
     Euler::Simple::Equation<N> initial;
@@ -86,7 +86,51 @@ void testEulerSimple() {
     std::cout << "Recording complete" << std::endl;
 }
 
+void testEulerRF() {
+    const indexType N = 1000;                                       // по пространству
+    std::vector<std::tuple<double, Euler::RF::Equation<N>>> eq;     // gamma = 1.4
+    
+    Euler::RF::Equation<N> initial;
+    
+    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::RF::State(1.0, 100.0, 1.0); }  // НУ (ρ, u, p)
+    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::RF::State(0.8, 0.0, 0.5); }    // НУ (ρ, u, p)
+    
+    const double dx = 1;
+    
+    const double startTime = 0;
+    const double endTime = 15;
+
+    eq.emplace_back(std::make_tuple(startTime, initial));
+    
+    std::ofstream file("res.csv");
+
+    if (file.is_open()) {
+        file << "t,x,rho,u,p" << std::endl;
+        Core<Euler::RF::Equation<N>, N>::solve(eq, startTime, endTime, dx, 0.4);
+        std::cout << "Recording..." << std::endl;
+
+        for (const auto& elem : eq) {
+            for (indexType i = 0; i < N; ++i) {
+                const auto t = std::get<0>(elem);
+                const auto U = std::get<1>(elem);
+
+                const auto rho = U.states[i].rho;
+                const auto u = U.states[i].getVelocity();
+                const auto p = U.states[i].getPressure();
+
+                file << std::setprecision(4) << t << ',' << i * dx 
+                     << ',' << rho << ',' << u << ',' << p << std::endl;
+            }
+        }
+    }
+    
+    file.close();
+
+    std::cout << "Recording complete" << std::endl;
+}
+
 int main() {
-    testEulerSimple();
+    testEulerRF();
+    // testEulerSimple();
     // testBurgers();
 }

@@ -134,3 +134,58 @@ struct Core<Euler::Simple::Equation<N>, N> {
         std::cout << std::endl;
     }
 };
+
+
+template<indexType N>
+struct Core<Euler::RF::Equation<N>, N> {
+    static void solve(std::vector<std::tuple<double, Euler::RF::Equation<N>>>& eq, 
+                      const double startTime, const double endTime,
+                      const double dx, const double CFL = 0.5) {
+        assert(startTime < endTime);
+        assert(dx > 0);
+
+        std::array<Euler::RF::Flux, N + 1> F;    
+        
+        double t = startTime;  
+        
+        while (t < endTime) {
+            Euler::RF::Equation<N> solution = std::get<1>(eq.back());
+            F.fill(Euler::RF::Flux(0, 0, 0));
+
+            F.front() = solution.calcFlux(solution.states.front()); // перенос из центра
+            F.back() = solution.calcFlux(solution.states.back());   // перенос из центра
+
+            double maxVelocity = 0.0;
+
+            for (const auto& state : solution.states) {
+                const double c = std::sqrt(state.getGamma() * state.getPressure() / state.rho);
+                maxVelocity = std::max(maxVelocity, c + std::abs(state.getVelocity()));
+            }
+
+            const double timeStep = CFL * dx / maxVelocity;
+            std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
+
+            using HLLSolver = Solvers::HLL<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N>>;
+            using HLLCSolver = Solvers::HLLC<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N>>;
+
+            for (indexType i = 1; i < N; ++i) {
+                F[i] = HLLCSolver::solve(solution, i);
+            }
+
+            for (indexType i = 0; i < N; ++i) {
+                solution.states[i] -= (F[i + 1] - F[i]) * timeStep / dx;
+            }
+
+            eq.emplace_back(std::make_tuple(t, solution));
+
+            // solution.smooth();
+
+            t += timeStep;
+        }
+
+        for (indexType i = 0; i < 26; ++i) {
+            std::cout << '-';
+        }
+        std::cout << std::endl;
+    }
+};

@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "EulerFlux.hpp"
+#include "Euler/RF/EulerFlux.hpp"
 
 namespace Euler::RF {
 

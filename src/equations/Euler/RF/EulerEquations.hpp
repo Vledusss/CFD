@@ -3,7 +3,7 @@
 #include <cmath>
 #include <vector>
 
-#include "EulerState.hpp"
+#include "Euler/RF/EulerState.hpp"
 
 using indexType = size_t;
 

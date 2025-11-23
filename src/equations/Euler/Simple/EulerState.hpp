@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "EulerFlux.hpp"
+#include "Euler/Simple/EulerFlux.hpp"
 
 namespace Euler::Simple {
 
