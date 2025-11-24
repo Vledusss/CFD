@@ -99,7 +99,7 @@ void testEulerRF() {
     const double dx = 1;
     
     const double startTime = 0;
-    const double endTime = 0.5;
+    const double endTime = 0.8;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
     
@@ -112,17 +112,19 @@ void testEulerRF() {
 
         for (const auto& elem : eq) {
             for (indexType i = 0; i < N; ++i) {
-                const auto t = std::get<0>(elem);
-                const auto U = std::get<1>(elem);
+                if (i * dx >= 200 && i * dx <= 800) {
+                    const auto t = std::get<0>(elem);
+                    const auto U = std::get<1>(elem);
 
-                const auto rho = U.states[i].rho;
-                const auto u = U.states[i].getVelocity();
-                const auto p = U.states[i].getPressure();
-                const auto T = U.states[i].getTemperature();
-                const auto Yp = U.states[i].rho_Yp / rho;
+                    const auto rho = U.states[i].rho;
+                    const auto u = U.states[i].getVelocity();
+                    const auto p = U.states[i].getPressure();
+                    const auto T = U.states[i].getTemperature();
+                    const auto Yp = U.states[i].rho_Yp / rho;
 
-                file << std::setprecision(4) << t << ',' << i * dx 
-                     << ',' << rho << ',' << u << ',' << p << ',' << Yp << ',' << T << std::endl;
+                    file << std::setprecision(4) << t << ',' << i * dx - 200 
+                        << ',' << rho << ',' << u << ',' << p << ',' << Yp << ',' << T << std::endl;
+                }
             }
         }
     }
