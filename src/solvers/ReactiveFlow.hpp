@@ -5,43 +5,44 @@
 
 namespace Solvers {
 
+constexpr double A = 1e5;      // Фактор частоты
+constexpr double Ea = 2.87e6;     // Энергия активации
+
 template<typename State>
 struct ReactiveFlow {
     static State solve(const State& state, const double dt, const double tol = 1e-6) {
-        const double A = 1e5;      // Фактор частоты
-        const double Ea_R = 1e4;   // E_a / R (Энергия активации / Газовая постоянная)
-        const double Q = 1.0e6;    // Тепловыделение (Дж/кг)
+        const double rho = state.rho;
+        const double gamma = state.getGamma();
+        const double R = state.getR();
+        const double Q = state.getQ();
+        const double Ea_R = Ea / state.getR();   // ~ 10000К
 
         State currState = state;
-
         const Eigen::Vector2d U = {state.E, state.rho_Yp};
 
         for (indexType i = 0; i < 5; ++i) {
             const double T = currState.getTemperature();
-            const double rho = currState.rho;
             const double rho_Yp = currState.rho_Yp;
-            const double gamma = currState.getGamma();
-            const double R_spec = currState.getR();
             
             const double rho_Yf = rho - rho_Yp; // (Yf = 1 - Yp)
             const double exp = std::exp(-Ea_R / T);
             const double R_chem = A * std::max(0.0, rho_Yf) * exp; // A * ρYf * exp(-Ea/RT)
-            
-            const double omega_P = R_chem; 
+             
             const double omega_E = R_chem * Q; 
+            const double omega_Yp = R_chem;
 
-            const Eigen::Vector2d Omega = {omega_E, omega_P};
+            const Eigen::Vector2d Omega = {omega_E, omega_Yp};
             
-            const double dTdE = (gamma - 1.0) / (rho * R_spec); // ∂T/∂E
+            const double dTdE = (gamma - 1.0) / (rho * R); // ∂T/∂E
             const double Arr = Ea_R / (T * T);                  // Ea/(R*T^2)
-            const double R_chem_div_rhoYf = R_chem / std::max(1e-10, rho_Yf);
+            const double T_dep_term = -R_chem * Arr * Q *dTdE;
 
             Eigen::Matrix2d J;
             
             J(0, 0) = Q * R_chem * Arr * dTdE; 
-            J(0, 1) = -Q * A * exp;
+            J(0, 1) = -Q * A * exp + Q * T_dep_term;
             J(1, 0) = R_chem * Arr * dTdE; 
-            J(1, 1) = -A * exp;
+            J(1, 1) = -A * exp + T_dep_term;
 
             const Eigen::Matrix2d L = Eigen::Matrix2d::Identity() - dt * J; // L = I - dt * J
             const Eigen::Vector2d currU = {currState.E, currState.rho_Yp};
