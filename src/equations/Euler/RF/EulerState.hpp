@@ -14,8 +14,10 @@ struct State {
     
     State(const double density = 0, const double velocity = 0, 
           const double pressure = 0, const double product = 0,
-          const double g = 1.4, const double r = 287, const double q = 1e5) 
-          : rho(density), gamma(g), R(r), Q(q) {
+          const double reactionHeat = 1e6, 
+          const double adiabaticIndex = 1.4, 
+          const double Rspec = 287) 
+          : rho(density), gamma(adiabaticIndex), R(Rspec), Q(reactionHeat) {
         rho_u = density * velocity;
         rho_Yp = density * product;
         E = pressure / (gamma - 1) + 0.5 * rho * velocity * velocity  + rho_Yp * Q;
