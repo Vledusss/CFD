@@ -11,7 +11,7 @@ constexpr double Ea = 2.87e6;     // Энергия активации
 template<typename State>
 struct ReactiveFlow {
     static State solve(const State& state, const double dt, 
-                       const double tol = 1e-6, 
+                       const double tol = 1e-12, 
                        const double eps = 1e-10) {
         const double rho = state.rho;
         const double gamma = state.getGamma();
@@ -54,6 +54,8 @@ struct ReactiveFlow {
             currState.rho_Yp = std::max(currState.rho_Yp, 0.0);
             currState.rho_Yp = std::min(currState.rho_Yp, rho);
 
+            // std::cout << i << ' ' << deltaU.norm() << std::endl;
+            
             if (deltaU.norm() < tol) { break; }
         }
 
