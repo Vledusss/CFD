@@ -41,7 +41,7 @@ struct State {
 
         const double K = 0.5 * (temp_rho_u * temp_rho_u) / std::max(temp_rho, eps);
         const double e = temp_E - K; // ~ p
-        E = e > eps ? temp_E : eps + K;
+        E = e > eps / (gamma - 1) ? temp_E : eps / (gamma - 1) + K; // eps <-> eps / (gamma - 1)?
 
         rho = std::max(temp_rho, eps);
         rho_u = rho > eps ? temp_rho_u : 0.0;
