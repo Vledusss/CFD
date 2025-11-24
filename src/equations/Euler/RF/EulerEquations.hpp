@@ -25,7 +25,7 @@ struct Equation {
             state.rho_u,              // ρu
             state.rho_u * u + p,      // ρu² + p  
             u * (state.E + p),        // u(E + p)
-            u * state.rho_Yp;
+            u * state.rho_Yp
         );
     }
 
