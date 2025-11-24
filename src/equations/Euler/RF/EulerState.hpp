@@ -14,17 +14,19 @@ struct State {
     
     State(const double density = 0, const double velocity = 0, 
           const double pressure = 0, const double product = 0,
-          const double g = 1.4, const double r = 287) 
-          : rho(density), gamma(g), R(r) {
+          const double g = 1.4, const double r = 287, const double q = 1e5) 
+          : rho(density), gamma(g), R(r), Q(q) {
         rho_u = density * velocity;
-        E = pressure / (gamma - 1) + 0.5 * rho * velocity * velocity;
         rho_Yp = density * product;
+        E = pressure / (gamma - 1) + 0.5 * rho * velocity * velocity  + rho_Yp * Q;
     }
 
     
     double getGamma() const noexcept { return gamma; }
 
     double getR() const noexcept { return R; }
+
+    double getQ() const noexcept { return Q; }
     
     double getVelocity() const {
         // assert(rho > 0);
@@ -33,7 +35,7 @@ struct State {
 
     double getPressure() const {
         const double u = getVelocity();
-        const double p = (gamma - 1) * (E - 0.5 * rho * u * u);
+        const double p = (gamma - 1) * (E - 0.5 * rho * u * u - rho_Yp * Q);
         // assert(p > 0);
         return std::max(p, 1e-10);
     }
@@ -93,6 +95,7 @@ struct State {
 
     double gamma;
     double R;
+    double Q;
 };
 
 }  // namespace Euler::RF
