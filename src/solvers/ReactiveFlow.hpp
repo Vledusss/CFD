@@ -5,17 +5,19 @@
 
 namespace Solvers {
 
-constexpr double A = 1e5;      // Фактор частоты
+constexpr double A = 1e5;         // Фактор частоты
 constexpr double Ea = 2.87e6;     // Энергия активации
 
 template<typename State>
 struct ReactiveFlow {
-    static State solve(const State& state, const double dt, const double tol = 1e-6) {
+    static State solve(const State& state, const double dt, 
+                       const double tol = 1e-6, 
+                       const double eps = 1e-10) {
         const double rho = state.rho;
         const double gamma = state.getGamma();
         const double R = state.getR();
         const double Q = state.getQ();
-        const double Ea_R = Ea / state.getR();   // ~ 10000К
+        const double Ea_R = Ea / state.getR(); // ~ 10000К
 
         State currState = state;
         const Eigen::Vector2d U = {state.E, state.rho_Yp};
@@ -32,17 +34,13 @@ struct ReactiveFlow {
             const double omega_Yp = R_chem;
 
             const Eigen::Vector2d Omega = {omega_E, omega_Yp};
-            
-            const double dTdE = (gamma - 1.0) / (rho * R); // ∂T/∂E
-            const double Arr = Ea_R / (T * T);                  // Ea/(R*T^2)
-            const double T_dep_term = -R_chem * Arr * Q *dTdE;
 
             Eigen::Matrix2d J;
             
-            J(0, 0) = Q * R_chem * Arr * dTdE; 
-            J(0, 1) = -Q * A * exp + Q * T_dep_term;
-            J(1, 0) = R_chem * Arr * dTdE; 
-            J(1, 1) = -A * exp + T_dep_term;
+            J(1, 0) =  (gamma - 1.0) * R_chem * Ea_R / T / T / R / std::max(rho, eps); 
+            J(1, 1) = -A * exp - Q * J(1, 0);
+            J(0, 0) = Q * J(1, 0); 
+            J(0, 1) = Q * J(1, 1);
 
             const Eigen::Matrix2d L = Eigen::Matrix2d::Identity() - dt * J; // L = I - dt * J
             const Eigen::Vector2d currU = {currState.E, currState.rho_Yp};
@@ -58,8 +56,6 @@ struct ReactiveFlow {
 
             if (deltaU.norm() < tol) { break; }
         }
-
-        const double eps = 1e-10;
 
         const double K = 0.5 * (currState.rho_u * currState.rho_u) / std::max(currState.rho, eps);
         const double e = currState.E - K; // ~ p
