@@ -153,8 +153,9 @@ struct Core<Euler::RF::Equation<N>, N> {
             Euler::RF::Equation<N + 2> solution;
 
             const auto eq = std::get<1>(eqs.back());
-            solution.states.front() = eq.states.front();
             std::copy(eq.states.begin(), eq.states.end(), solution.states.begin() + 1);
+            
+            solution.states.front() = eq.states.front();
             solution.states.back() = eq.states.back();
 
             F.fill(Euler::RF::Flux(0, 0, 0));
