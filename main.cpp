@@ -88,17 +88,18 @@ void testEulerSimple() {
 
 void testEulerRF() {
     const indexType N = 1000;                                       // по пространству
+    const indexType IGNITION_ZONE = N / 2;
     std::vector<std::tuple<double, Euler::RF::Equation<N>>> eq;     // gamma = 1.4
     
     Euler::RF::Equation<N> initial;
     
-    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::RF::State(1.0, 0.0, 430500, 1e-6); }  // НУ (ρ, u, p)
-    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::RF::State(0.8, 0.0, 101325, 0); }    // НУ (ρ, u, p)
+    for (indexType i = 0; i < IGNITION_ZONE; ++i) { initial.states[i] = Euler::RF::State(1.0, 0.0, 430500, 1); }    // НУ (ρ, u, p)
+    for (indexType i = IGNITION_ZONE; i < N; ++i) { initial.states[i] = Euler::RF::State(0.8, 0.0, 101325, 0); }    // НУ (ρ, u, p)
     
     const double dx = 1;
     
     const double startTime = 0;
-    const double endTime = 0.08;
+    const double endTime = 0.5;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
     

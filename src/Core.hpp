@@ -139,7 +139,7 @@ struct Core<Euler::Simple::Equation<N>, N> {
 
 template<indexType N>
 struct Core<Euler::RF::Equation<N>, N> {
-    static void solve(std::vector<std::tuple<double, Euler::RF::Equation<N>>>& eq, 
+    static void solve(std::vector<std::tuple<double, Euler::RF::Equation<N>>>& eqs, 
                       const double startTime, const double endTime,
                       const double dx, const double CFL = 0.5) {
         assert(startTime < endTime);
@@ -150,11 +150,14 @@ struct Core<Euler::RF::Equation<N>, N> {
         double t = startTime;  
         
         while (t < endTime) {
-            Euler::RF::Equation<N> solution = std::get<1>(eq.back());
-            F.fill(Euler::RF::Flux(0, 0, 0));
+            Euler::RF::Equation<N + 2> solution;
 
-            F.front() = solution.calcFlux(solution.states.front()); // перенос из центра
-            F.back() = solution.calcFlux(solution.states.back());   // перенос из центра
+            const auto eq = std::get<1>(eqs.back());
+            solution.states.front() = eq.states.front();
+            std::copy(eq.states.begin(), eq.states.end(), solution.states.begin() + 1);
+            solution.states.back() = eq.states.back();
+
+            F.fill(Euler::RF::Flux(0, 0, 0));
 
             double maxVelocity = 0.0;
 
@@ -166,23 +169,25 @@ struct Core<Euler::RF::Equation<N>, N> {
             const double timeStep = CFL * dx / maxVelocity;
             std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
 
-            using HLLSolver = Solvers::HLL<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N>>;
-            using HLLCSolver = Solvers::HLLC<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N>>;
+            using HLLSolver = Solvers::HLL<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N+2>>;
+            using HLLCSolver = Solvers::HLLC<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N+2>>;
             using RFSolver = Solvers::ReactiveFlow<Euler::RF::State>;
 
-            for (indexType i = 1; i < N; ++i) {
-                F[i] = HLLCSolver::solve(solution, i);
+            for (indexType i = 0; i < N + 1; ++i) {
+                F[i] = HLLCSolver::solve(solution, i + 1);
             }
 
             for (indexType i = 0; i < N; ++i) {
-                solution.states[i] -= (F[i + 1] - F[i]) * timeStep / dx;
+                solution.states[i + 1] -= (F[i + 1] - F[i]) * timeStep / dx;
             }
 
-            for (indexType i = 0; i < N; ++i) {
+            for (indexType i = 1; i < N + 1; ++i) {
                 solution.states[i] = RFSolver::solve(solution.states[i], timeStep);
             }
 
-            eq.emplace_back(std::make_tuple(t, solution));
+            Euler::RF::Equation<N> result;
+            std::copy(solution.states.begin() + 1, solution.states.end() - 1, result.states.begin());
+            eqs.emplace_back(std::make_tuple(t, result));
 
             // solution.smooth();
 
