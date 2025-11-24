@@ -168,6 +168,7 @@ struct Core<Euler::RF::Equation<N>, N> {
 
             using HLLSolver = Solvers::HLL<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N>>;
             using HLLCSolver = Solvers::HLLC<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N>>;
+            using RFSolver = Solvers::ReactiveFlow<Euler::RF::State>;
 
             for (indexType i = 1; i < N; ++i) {
                 F[i] = HLLCSolver::solve(solution, i);
@@ -178,7 +179,7 @@ struct Core<Euler::RF::Equation<N>, N> {
             }
 
             for (indexType i = 0; i < N; ++i) {
-                solution.states[i] = Solvers::solveChemistry(solution.states[i], timeStep);
+                solution.states[i] = RFSolver::solve(solution.states[i], timeStep);
             }
 
             eq.emplace_back(std::make_tuple(t, solution));
