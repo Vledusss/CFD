@@ -10,6 +10,7 @@
 #include "solvers/LaxFriedrichs.hpp"
 #include "solvers/HLL.hpp"
 #include "solvers/HLLC.hpp"
+#include "solvers/ReactiveFlow.hpp"
 
 using indexType = std::size_t;
 
@@ -174,6 +175,10 @@ struct Core<Euler::RF::Equation<N>, N> {
 
             for (indexType i = 0; i < N; ++i) {
                 solution.states[i] -= (F[i + 1] - F[i]) * timeStep / dx;
+            }
+
+            for (indexType i = 0; i < N; ++i) {
+                solution.states[i] = Solvers::solveChemistry(solution.states[i], timeStep);
             }
 
             eq.emplace_back(std::make_tuple(t, solution));

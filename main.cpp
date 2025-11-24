@@ -92,20 +92,20 @@ void testEulerRF() {
     
     Euler::RF::Equation<N> initial;
     
-    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::RF::State(1.0, 100.0, 1.0); }  // НУ (ρ, u, p)
-    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::RF::State(0.8, 0.0, 0.5); }    // НУ (ρ, u, p)
+    for (indexType i = 0; i < N / 2; ++i) { initial.states[i] = Euler::RF::State(1.0, 0.0, 430500, 1e-6); }  // НУ (ρ, u, p)
+    for (indexType i = N / 2; i < N; ++i) { initial.states[i] = Euler::RF::State(0.8, 0.0, 101325, 0); }    // НУ (ρ, u, p)
     
     const double dx = 1;
     
     const double startTime = 0;
-    const double endTime = 15;
+    const double endTime = 0.08;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
     
     std::ofstream file("res.csv");
 
     if (file.is_open()) {
-        file << "t,x,rho,u,p" << std::endl;
+        file << "t,x,rho,u,p,Yp,T" << std::endl;
         Core<Euler::RF::Equation<N>, N>::solve(eq, startTime, endTime, dx, 0.4);
         std::cout << "Recording..." << std::endl;
 
@@ -117,9 +117,11 @@ void testEulerRF() {
                 const auto rho = U.states[i].rho;
                 const auto u = U.states[i].getVelocity();
                 const auto p = U.states[i].getPressure();
+                const auto T = U.states[i].getTemperature();
+                const auto Yp = U.states[i].rho_Yp / rho;
 
                 file << std::setprecision(4) << t << ',' << i * dx 
-                     << ',' << rho << ',' << u << ',' << p << std::endl;
+                     << ',' << rho << ',' << u << ',' << p << ',' << Yp << ',' << T << std::endl;
             }
         }
     }
@@ -131,6 +133,8 @@ void testEulerRF() {
 
 int main() {
     testEulerRF();
+
     // testEulerSimple();
+
     // testBurgers();
 }

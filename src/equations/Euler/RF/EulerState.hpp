@@ -14,7 +14,8 @@ struct State {
     
     State(const double density = 0, const double velocity = 0, 
           const double pressure = 0, const double product = 0,
-          const double g = 1.4) : rho(density), gamma(g) {
+          const double g = 1.4, const double r = 287) 
+          : rho(density), gamma(g), R(r) {
         rho_u = density * velocity;
         E = pressure / (gamma - 1) + 0.5 * rho * velocity * velocity;
         rho_Yp = density * product;
@@ -22,6 +23,8 @@ struct State {
 
     
     double getGamma() const noexcept { return gamma; }
+
+    double getR() const noexcept { return R; }
     
     double getVelocity() const {
         // assert(rho > 0);
@@ -35,6 +38,10 @@ struct State {
         return std::max(p, 1e-10);
     }
 
+    double getTemperature() const {
+        return getPressure() / std::max(rho, 1e-10) / R;
+    }
+
     State& operator-=(const Flux& flux) {
         const double eps = 1e-10; 
 
@@ -45,11 +52,12 @@ struct State {
 
         const double K = 0.5 * (temp_rho_u * temp_rho_u) / std::max(temp_rho, eps);
         const double e = temp_E - K; // ~ p
-        E = e > eps ? temp_E : eps + K;
+        E = e > eps / (gamma - 1) ? temp_E : eps / (gamma - 1) + K;
 
         rho = std::max(temp_rho, eps);
         rho_u = rho > eps ? temp_rho_u : 0.0;
         rho_Yp = rho > eps ? temp_rho_Yp : 0.0;
+        rho_Yp = std::min(rho_Yp, rho);
 
         return *this;
     }
@@ -84,6 +92,7 @@ struct State {
     private:
 
     double gamma;
+    double R;
 };
 
 }  // namespace Euler::RF
