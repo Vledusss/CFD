@@ -37,7 +37,7 @@ struct ReactiveFlow {
 
             Eigen::Matrix2d J;
             
-            J(1, 0) =  (gamma - 1.0) * R_chem * Ea_R / T / T / R / std::max(rho, eps); 
+            J(1, 0) = (gamma - 1.0) * R_chem * Ea_R / T / T / R / std::max(rho, eps); 
             J(1, 1) = -A * exp - Q * J(1, 0);
             J(0, 0) = Q * J(1, 0); 
             J(0, 1) = Q * J(1, 1);
@@ -60,9 +60,9 @@ struct ReactiveFlow {
         }
 
         const double K = 0.5 * (currState.rho_u * currState.rho_u) / std::max(currState.rho, eps);
-        const double e = currState.E - K; // ~ p
-        currState.E = e > eps / (currState.getGamma() - 1) ? 
-            currState.E : eps / (currState.getGamma() - 1) + K;
+        const double e = currState.E - K - currState.rho_Yp * Q; // ~ p
+        currState.E = e > eps / (gamma - 1) ? 
+            currState.E : eps / (gamma - 1) + K;
 
         currState.rho = std::max(currState.rho, eps);
         currState.rho_u = currState.rho > eps ? currState.rho_u : 0.0;

@@ -55,7 +55,7 @@ struct State {
         const double temp_rho_Yp = rho_Yp - flux.product;
 
         const double K = 0.5 * (temp_rho_u * temp_rho_u) / std::max(temp_rho, eps);
-        const double e = temp_E - K; // ~ p
+        const double e = temp_E - K - rho_Yp * Q; // ~ p
         E = e > eps / (gamma - 1) ? temp_E : eps / (gamma - 1) + K;
 
         rho = std::max(temp_rho, eps);
