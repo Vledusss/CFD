@@ -6,7 +6,7 @@
 namespace Solvers {
 
 constexpr double A = 1e5;         // Фактор частоты
-constexpr double Ea = 2.87e6;     // Энергия активации
+constexpr double Ea = 2.87e6;     // Энергия активации (Ea/R ~ 10000К)
 
 template<typename State>
 struct ReactiveFlow {
@@ -17,7 +17,6 @@ struct ReactiveFlow {
         const double gamma = state.getGamma();
         const double R = state.getR();
         const double Q = state.getQ();
-        const double Ea_R = Ea / state.getR(); // ~ 10000К
 
         State currState = state;
         const Eigen::Vector2d U = {state.E, state.rho_Yp};
@@ -25,19 +24,17 @@ struct ReactiveFlow {
         for (indexType i = 0; i < 5; ++i) {
             const double T = currState.getTemperature();
             const double rho_Yp = currState.rho_Yp;
-            
             const double rho_Yf = rho - rho_Yp; // (Yf = 1 - Yp)
-            const double exp = std::exp(-Ea_R / T);
-            const double R_chem = A * std::max(0.0, rho_Yf) * exp; // A * ρYf * exp(-Ea/RT)
+            const double exp = std::exp(-Ea / R / T);
              
-            const double omega_E = R_chem * Q; 
-            const double omega_Yp = R_chem;
+            const double omega_Yp = A * std::max(0.0, rho_Yf) * exp;;
+            const double omega_E = Q * omega_Yp; 
 
             const Eigen::Vector2d Omega = {omega_E, omega_Yp};
 
-            Eigen::Matrix2d J;
+            Eigen::Matrix2d J; // Якобиан
             
-            J(1, 0) = (gamma - 1.0) * R_chem * Ea_R / T / T / R / std::max(rho, eps); 
+            J(1, 0) = (gamma - 1.0) * omega_Yp * Ea / T / T / R / R / std::max(rho, eps); 
             J(1, 1) = -A * exp - Q * J(1, 0);
             J(0, 0) = Q * J(1, 0); 
             J(0, 1) = Q * J(1, 1);
