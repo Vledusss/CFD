@@ -51,6 +51,7 @@ struct Core<Burgers::Equation<N>, N> {
 
             const double timeStep = CFL * dx / maxVelocity;
             std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
+            assert(timeStep > 1e-8);
 
             for (indexType i = 0; i < N - 1; ++i) {
                 edgeStates[i + 1] = solution.calcU(solution.states[i], solution.states[i + 1]);
@@ -110,6 +111,7 @@ struct Core<Euler::Simple::Equation<N>, N> {
 
             const double timeStep = CFL * dx / maxVelocity;
             std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
+            assert(timeStep > 1e-8);
 
             using HLLSolver = Solvers::HLL<Euler::Simple::State, Euler::Simple::Flux, Euler::Simple::Equation<N>>;
             using HLLCSolver = Solvers::HLLC<Euler::Simple::State, Euler::Simple::Flux, Euler::Simple::Equation<N>>;
@@ -169,6 +171,7 @@ struct Core<Euler::RF::Equation<N>, N> {
 
             const double timeStep = CFL * dx / maxVelocity;
             std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
+            assert(timeStep > 1e-8);
 
             using HLLSolver = Solvers::HLL<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N+2>>;
             using HLLCSolver = Solvers::HLLC<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N+2>>;
