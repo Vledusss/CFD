@@ -14,7 +14,7 @@
 
 using indexType = std::size_t;
 
-template<typename Equation, indexType N>
+template<typename Equation, typename Solver, indexType N>
 struct Core {
     static void solve(std::vector<std::tuple<double, Equation>>& eq, 
                       const double startTime, const double endTime,
@@ -22,7 +22,7 @@ struct Core {
 };
 
 template<indexType N>
-struct Core<Burgers::Equation<N>, N> {
+struct Core<Burgers::Equation<N>, Solvers::LaxFriedrichs<double, double, Burgers::Equation<N>>, N> {
     static void solve(std::vector<std::tuple<double, Burgers::Equation<N>>>& eq, 
                       const double startTime, const double endTime,
                       const double dx, const double CFL = 0.5) {
@@ -83,8 +83,8 @@ struct Core<Burgers::Equation<N>, N> {
     }
 };
 
-template<indexType N>
-struct Core<Euler::Simple::Equation<N>, N> {
+template<typename Solver, indexType N>
+struct Core<Euler::Simple::Equation<N>, Solver, N> {
     static void solve(std::vector<std::tuple<double, Euler::Simple::Equation<N>>>& eq, 
                       const double startTime, const double endTime,
                       const double dx, const double CFL = 0.5) {
@@ -113,11 +113,8 @@ struct Core<Euler::Simple::Equation<N>, N> {
             std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
             assert(timeStep > 1e-8);
 
-            using HLLSolver = Solvers::HLL<Euler::Simple::State, Euler::Simple::Flux, Euler::Simple::Equation<N>>;
-            using HLLCSolver = Solvers::HLLC<Euler::Simple::State, Euler::Simple::Flux, Euler::Simple::Equation<N>>;
-
             for (indexType i = 1; i < N; ++i) {
-                F[i] = HLLCSolver::solve(solution, i);
+                F[i] = Solver::solve(solution, i);
             }
 
             for (indexType i = 0; i < N; ++i) {
@@ -139,8 +136,8 @@ struct Core<Euler::Simple::Equation<N>, N> {
 };
 
 
-template<indexType N>
-struct Core<Euler::RF::Equation<N>, N> {
+template<typename Solver, indexType N>
+struct Core<Euler::RF::Equation<N>, Solver, N> {
     static void solve(std::vector<std::tuple<double, Euler::RF::Equation<N>>>& eqs, 
                       const double startTime, const double endTime,
                       const double dx, const double CFL = 0.5) {
@@ -173,12 +170,10 @@ struct Core<Euler::RF::Equation<N>, N> {
             std::cout << t << ' ' << maxVelocity << ' ' << timeStep << std::endl;
             assert(timeStep > 1e-8);
 
-            using HLLSolver = Solvers::HLL<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N+2>>;
-            using HLLCSolver = Solvers::HLLC<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N+2>>;
             using RFSolver = Solvers::ReactiveFlow<Euler::RF::State>;
 
             for (indexType i = 0; i < N + 1; ++i) {
-                F[i] = HLLCSolver::solve(solution, i + 1);
+                F[i] = Solver::solve(solution, i + 1);
             }
 
             for (indexType i = 0; i < N; ++i) {

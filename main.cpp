@@ -20,12 +20,14 @@ void testBurgers() {
     const double endTime = 10;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
+
+    using LFSolver = Solvers::LaxFriedrichs<double, double, Burgers::Equation<N>>;
     
     std::ofstream file("res.csv");
 
     if (file.is_open()) {
         file << "t,x,u" << std::endl;
-        Core<Burgers::Equation<N>, N>::solve(eq, startTime, endTime, dx);
+        Core<Burgers::Equation<N>, LFSolver, N>::solve(eq, startTime, endTime, dx);
         std::cout << "Recording..." << std::endl;
 
         for (const auto& elem : eq) {
@@ -58,12 +60,15 @@ void testEulerSimple() {
     const double endTime = 15;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
+
+    using HLLSolver = Solvers::HLL<Euler::Simple::State, Euler::Simple::Flux, Euler::Simple::Equation<N>>;
+    using HLLCSolver = Solvers::HLLC<Euler::Simple::State, Euler::Simple::Flux, Euler::Simple::Equation<N>>;
     
     std::ofstream file("res.csv");
 
     if (file.is_open()) {
         file << "t,x,rho,u,p" << std::endl;
-        Core<Euler::Simple::Equation<N>, N>::solve(eq, startTime, endTime, dx, 0.4);
+        Core<Euler::Simple::Equation<N>, HLLCSolver, N>::solve(eq, startTime, endTime, dx, 0.4);
         std::cout << "Recording..." << std::endl;
 
         for (const auto& elem : eq) {
@@ -88,10 +93,10 @@ void testEulerSimple() {
 
 void testEulerRF() {
     const indexType N = 1000;                                       // по пространству
-    const indexType IGNITION_ZONE = N / 2;
     std::vector<std::tuple<double, Euler::RF::Equation<N>>> eq;     // gamma = 1.4
     
     Euler::RF::Equation<N> initial;
+    const indexType IGNITION_ZONE = N / 2;
     
     for (indexType i = 0; i < IGNITION_ZONE; ++i) { initial.states[i] = Euler::RF::State(1.0, 0.0, 430500, 1, 1e5); }    // НУ (ρ, u, p, Yp, Q) -> HLLC
     for (indexType i = IGNITION_ZONE; i < N; ++i) { initial.states[i] = Euler::RF::State(0.8, 0.0, 101325, 0, 1e5); }    // НУ (ρ, u, p, Yp, Q) -> HLLC
@@ -108,12 +113,15 @@ void testEulerRF() {
     const double endTime = 0.8;
 
     eq.emplace_back(std::make_tuple(startTime, initial));
+
+    using HLLSolver = Solvers::HLL<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N + 2>>;
+    using HLLCSolver = Solvers::HLLC<Euler::RF::State, Euler::RF::Flux, Euler::RF::Equation<N + 2>>;
     
     std::ofstream file("res.csv");
 
     if (file.is_open()) {
         file << "t,x,rho,u,p,Yp,T" << std::endl;
-        Core<Euler::RF::Equation<N>, N>::solve(eq, startTime, endTime, dx, 0.4);
+        Core<Euler::RF::Equation<N>, HLLCSolver, N>::solve(eq, startTime, endTime, dx, 0.4);
         std::cout << "Recording..." << std::endl;
 
         for (const auto& elem : eq) {
