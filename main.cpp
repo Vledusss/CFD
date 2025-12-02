@@ -98,11 +98,8 @@ void testEulerRF() {
     Euler::RF::Equation<N> initial;
     const indexType IGNITION_ZONE = N / 2;
     
-    for (indexType i = 0; i < IGNITION_ZONE; ++i) { initial.states[i] = Euler::RF::State(1.0, 0.0, 430500, 1, 1e5); }    // НУ (ρ, u, p, Yp, Q) -> HLLC
+    for (indexType i = 0; i < IGNITION_ZONE; ++i) { initial.states[i] = Euler::RF::State(1.0, 0.0, 430500, 0, 1e5); }    // НУ (ρ, u, p, Yp, Q) -> HLLC
     for (indexType i = IGNITION_ZONE; i < N; ++i) { initial.states[i] = Euler::RF::State(0.8, 0.0, 101325, 0, 1e5); }    // НУ (ρ, u, p, Yp, Q) -> HLLC
-
-    // for (indexType i = 0; i < IGNITION_ZONE; ++i) { initial.states[i] = Euler::RF::State(1.0, 0.0, 184000, 0, 1e6); }    // НУ (ρ, u, p, Yp, Q) -> HLL
-    // for (indexType i = IGNITION_ZONE; i < N; ++i) { initial.states[i] = Euler::RF::State(0.8, 0.0, 86100, 0, 1e6); }     // НУ (ρ, u, p, Yp, Q) -> HLL
 
     // for (indexType i = 0; i < IGNITION_ZONE; ++i) { initial.states[i] = Euler::RF::State(1.37, 704.0, 430500, 1, 1e6); }    // НУ (ρ, u, p, Yp, Q) -> HLLC 
     // for (indexType i = IGNITION_ZONE; i < N; ++i) { initial.states[i] = Euler::RF::State(0.8, 0.0, 101325, 0, 1e6); }       // НУ (ρ, u, p, Yp, Q) -> HLLC
