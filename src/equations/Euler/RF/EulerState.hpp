@@ -85,12 +85,25 @@ struct State {
     }
     
     Flux operator*(const double scalar) const {
-        return Flux(
+        return {
             rho * scalar, 
             rho_u * scalar, 
             E * scalar, 
             rho_Yp * scalar
-        );
+        };
+    }
+
+    State& operator*=(const double scalar) {
+        rho *= scalar; 
+        rho_u *= scalar; 
+        E *= scalar; 
+
+        const double temp_rho_Yp = rho_Yp * scalar;
+
+        rho_Yp = std::max(temp_rho_Yp, 0.0);
+        rho_Yp = std::min(temp_rho_Yp, rho);
+
+        return *this;
     }
 
     private:

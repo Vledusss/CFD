@@ -66,7 +66,15 @@ struct State {
     }
     
     Flux operator*(const double scalar) const {
-        return Flux(rho * scalar, rho_u * scalar, E * scalar);
+        return Flux{rho * scalar, rho_u * scalar, E * scalar};
+    }
+
+    State& operator*=(const double scalar) {
+        rho *= scalar; 
+        rho_u *= scalar; 
+        E *= scalar;
+
+        return *this;
     }
 
     private:
