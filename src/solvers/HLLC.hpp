@@ -31,8 +31,8 @@ struct HLLC {
         const double uL = left.getVelocity();
         const double uR = right.getVelocity();
         
-        const double cL = std::sqrt(left.getGamma() * pL / left.rho);
-        const double cR = std::sqrt(right.getGamma() * pR / right.rho);
+        const double cL = std::sqrt(left.getGamma() * pL / rhoL);
+        const double cR = std::sqrt(right.getGamma() * pR / rhoR);
         
         const double SL = std::min(uL - cL, uR - cR);
         const double SR = std::max(uL + cL, uR + cR);
@@ -50,20 +50,18 @@ struct HLLC {
         if (SL >= 0) { return FL; } 
         else if (SR <= 0) { return FR; } 
         else if (SL <= 0 && SM >= 0) {
-            State UStarL;
-            const double factor = rhoL * (SL - uL) / (SL - SM);
-            UStarL.rho = factor;
-            UStarL.rho_u = factor * SM;
-            UStarL.E = factor * (left.E / rhoL + (SM - uL) * (SM + pL / rhoL / (SL - uL)));
+            State UStarL = left;
+            UStarL *= (SL - uL) / (SL - SM);
+            UStarL.rho_u = UStarL.rho * SM;
+            UStarL.E = UStarL.rho * (left.E / rhoL + (SM - uL) * (SM + pL / rhoL / (SL - uL)));
 
             return FL + (UStarL - left) * SL; 
         }
         else {
-            State UStarR;
-            const double factor = rhoR * (SR - uR) / (SR - SM);
-            UStarR.rho = factor;
-            UStarR.rho_u = factor * SM;
-            UStarR.E = factor * (right.E / rhoR + (SM - uR) * (SM + pR / rhoR / (SR - uR)));
+            State UStarR = right;
+            UStarR *= (SR - uR) / (SR - SM);
+            UStarR.rho_u = UStarR.rho * SM;
+            UStarR.E = UStarR.rho * (right.E / rhoR + (SM - uR) * (SM + pR / rhoR / (SR - uR)));
 
             return FR + (UStarR - right) * SR; 
         }
