@@ -123,8 +123,6 @@ struct Core<Euler::Simple::Equation<N>, Solver, N> {
 
             eq.emplace_back(std::make_tuple(t, solution));
 
-            // solution.smooth();
-
             t += timeStep;
         }
 
@@ -187,8 +185,6 @@ struct Core<Euler::RF::Equation<N>, Solver, N> {
             Euler::RF::Equation<N> result;
             std::copy(solution.states.begin() + 1, solution.states.end() - 1, result.states.begin());
             eqs.emplace_back(std::make_tuple(t, result));
-
-            // solution.smooth();
 
             t += timeStep;
         }
